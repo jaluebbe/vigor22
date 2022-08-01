@@ -6,6 +6,12 @@ map.attributionControl.addAttribution(
 // add link to privacy statement
 //map.attributionControl.addAttribution(
 //    '<a href="static/datenschutz.html" target="_blank">Datenschutzerkl&auml;rung</a>');
+function addLegend(layerName, layerLabel) {
+    if (layerLabel === undefined)
+        layerLabel = layerName;
+    let apiUrl = "https://api3.geo.admin.ch/rest/services/api/MapServer/";
+    return ("<a href='" + apiUrl + layerName + "/legend?lang=en' target='_blank'>" + layerLabel + "</a>");
+};
 var swisstopo_NationalMapColor = L.tileLayer.swiss({
     "layer": "ch.swisstopo.pixelkarte-farbe"
 }).addTo(map);
@@ -41,15 +47,18 @@ L.control.scale({
     'imperial': false
 }).addTo(map);
 baseLayers = {
-    "ch.swisstopo.pixelkarte-farbe": swisstopo_NationalMapColor,
-    "ch.swisstopo.swissimage": swisstopo_SWISSIMAGE
+    "Map of Switzerland": swisstopo_NationalMapColor,
+    "Aerial view of Switzerland": swisstopo_SWISSIMAGE
 };
-otherLayers = {
-    "ch.blw.bodeneignung-naehrstoffspeichervermoegen": swisstopo_bodeneignung_naehrstoffspeichervermoegen,
-    "ch.blw.erosion": swisstopo_erosion,
-    "ch.bafu.naqua-grundwasser_nitrat": swisstopo_grundwasser_nitrat,
-    "ch.blw.bodeneignung-gruendigkeit": swisstopo_bodenneigung_gruendigkeit
-};
+
+otherLayers = {};
+otherLayers[addLegend("ch.blw.erosion", "Erosion risk for arable land")] = swisstopo_erosion;
+otherLayers[addLegend("ch.bafu.naqua-grundwasser_nitrat", "Nitrates in groundwater")] = swisstopo_grundwasser_nitrat;
+otherLayers[addLegend("ch.blw.bodeneignung-gruendigkeit", "Root penetration dept")] =
+    swisstopo_bodenneigung_gruendigkeit;
+otherLayers[addLegend("ch.blw.bodeneignung-naehrstoffspeichervermoegen", "Nutrient storage capacity")] =
+    swisstopo_bodeneignung_naehrstoffspeichervermoegen;
+
 var layerControl = L.control.layers(baseLayers, otherLayers, {
     collapsed: L.Browser.mobile, // hide on mobile devices
     position: 'topright'
