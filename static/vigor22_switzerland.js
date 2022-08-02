@@ -12,11 +12,6 @@ function addLegend(layerName, layerLabel) {
     let apiUrl = "https://api3.geo.admin.ch/rest/services/api/MapServer/";
     return ("<a href='" + apiUrl + layerName + "/legend?lang=en' target='_blank'>" + layerLabel + "</a>");
 };
-var myLayers = L.layerGroup().addTo(map);
-map.pm.setGlobalOptions({
-    layerGroup: myLayers
-});
-
 var swisstopo_NationalMapColor = L.tileLayer.swiss({
     "layer": "ch.swisstopo.pixelkarte-farbe"
 }).addTo(map);
@@ -63,7 +58,8 @@ otherLayers[addLegend("ch.blw.bodeneignung-gruendigkeit", "Root penetration dept
     swisstopo_bodenneigung_gruendigkeit;
 otherLayers[addLegend("ch.blw.bodeneignung-naehrstoffspeichervermoegen", "Nutrient storage capacity")] =
     swisstopo_bodeneignung_naehrstoffspeichervermoegen;
-otherLayers["my layers"] = myLayers;
+//otherLayers["my drawn layers"] = myDrawnLayers;
+//otherLayers["my imported layers"] = myImportedLayers;
 
 var layerControl = L.control.layers(baseLayers, otherLayers, {
     collapsed: L.Browser.mobile, // hide on mobile devices
