@@ -35,7 +35,7 @@ function importShapes() {
         fr.onload = function(fileData) {
             var geojsonInput = JSON.parse(fileData.target.result);
             myImportedLayers.addData(geojsonInput);
-            map.panInsideBounds(myImportedLayers.getBounds());
+            map.fitBounds(myImportedLayers.getBounds());
         };
         fr.readAsText(fileInput.files[i])
     }
