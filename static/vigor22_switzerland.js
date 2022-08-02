@@ -58,8 +58,6 @@ otherLayers[addLegend("ch.blw.bodeneignung-gruendigkeit", "Root penetration dept
     swisstopo_bodenneigung_gruendigkeit;
 otherLayers[addLegend("ch.blw.bodeneignung-naehrstoffspeichervermoegen", "Nutrient storage capacity")] =
     swisstopo_bodeneignung_naehrstoffspeichervermoegen;
-//otherLayers["my drawn layers"] = myDrawnLayers;
-//otherLayers["my imported layers"] = myImportedLayers;
 
 var layerControl = L.control.layers(baseLayers, otherLayers, {
     collapsed: L.Browser.mobile, // hide on mobile devices
