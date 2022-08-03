@@ -72,7 +72,7 @@ legend.onAdd = function(map) {
     this._div = L.DomUtil.create('div', 'info legend');
     this._div.innerHTML =
         '<h4>Data transfer</h4><table>' +
-        '<tr><td colspan="2"><input style="font-size: 9px;" type="file" id="fileInput" accept=".geojson,application/json,application/geo+json"></td></tr>' +
+        '<tr><td colspan="2"><input style="font-size: 9px;" type="file" id="fileInput" accept=".geojson,application/json,application/geo+json" multiple></td></tr>' +
         '<tr><td><button onclick="importShapes();">import</button></td><td><input type="checkbox" id="checkReplaceShapes">&nbsp;and replace</td></tr>' +
         '<tr><td><button onclick="exportShapes();">export</button></td>' +
         '<td><input type="checkbox" id="checkDrawnOnly">&nbsp;drawn only</td></tr>'
