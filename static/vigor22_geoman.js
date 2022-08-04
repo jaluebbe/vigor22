@@ -68,7 +68,8 @@ map.pm.addControls({
 });
 
 function clickedShape(eo) {
-    console.log(eo);
+    if (!map.pm.globalRemovalModeEnabled())
+        console.log(eo);
 }
 
 map.on('pm:create', function(e) {
