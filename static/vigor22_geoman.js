@@ -1,10 +1,62 @@
-var myDrawnLayers = L.layerGroup().addTo(map);
-map.pm.setGlobalOptions({
-    layerGroup: myDrawnLayers
-});
-var myImportedLayers = L.geoJSON().addTo(map);
-layerControl.addOverlay(myDrawnLayers, "my drawn layers");
-layerControl.addOverlay(myImportedLayers, "my imported layers");
+function onEachFeature(feature, layer) {
+    layer.on('click', function(eo) {
+        clickedShape(eo);
+    });
+    var tooltipContent =
+        "<pre>" + JSON.stringify(feature.properties, undefined, 2) + "</pre>";
+    layer.bindTooltip(tooltipContent, {
+        sticky: true,
+        direction: "top",
+        offset: [0, -5]
+    });
+}
+
+function styleShape(feature, styleProperties) {
+    return styleProperties;
+}
+
+var otherLayers = L.layerGroup().addTo(map);
+var boundariesLayer = L.geoJSON([], {
+    onEachFeature: onEachFeature,
+    style: function(feature) {
+        return styleShape(feature, {
+            fillColor: "#003399",
+            fillOpacity: 0.1,
+            weight: 1.5,
+            color: "grey"
+        });
+    }
+}).addTo(map);
+var planLayer = L.geoJSON([], {
+    onEachFeature: onEachFeature,
+    style: function(feature) {
+        return styleShape(feature, {
+            fillColor: "#ffcc00",
+            fillOpacity: 0.15,
+            weight: 1.5,
+            color: "grey"
+        });
+    }
+}).addTo(map);
+var protocolLayer = L.geoJSON([], {
+    onEachFeature: onEachFeature,
+    style: function(feature) {
+        return styleShape(feature, {
+            fillColor: "#00ee00",
+            fillOpacity: 0.1,
+            weight: 1.5,
+            color: "grey"
+        });
+    }
+}).addTo(map);
+layerControl.addOverlay(otherLayers, "other layers");
+var boundariesLayerLabel = "<span style='background-color:rgba(0, 51, 153, 0.2)'>Boundaries</span>";
+var planLayerLabel = "<span style='background-color:rgba(255, 204, 0, 0.2)'>Plan</span>";
+var protocolLayerLabel = "<span style='background-color:rgba(0, 238, 0, 0.2)'>Protocol</span>";
+layerControl.addOverlay(boundariesLayer, boundariesLayerLabel);
+layerControl.addOverlay(planLayer, planLayerLabel);
+layerControl.addOverlay(protocolLayer, protocolLayerLabel);
+
 map.pm.addControls({
     position: 'topleft',
     drawCircle: false,
@@ -25,6 +77,7 @@ map.on('pm:create', function(e) {
     })
 });
 
+
 function importShapes() {
     if (document.getElementById("checkReplaceShapes").checked) {
         myImportedLayers.clearLayers();
@@ -33,9 +86,10 @@ function importShapes() {
     for (var i = 0; i < fileInput.files.length; i++) {
         var fr = new FileReader();
         fr.onload = function(fileData) {
-            var geojsonInput = JSON.parse(fileData.target.result);
-            myImportedLayers.addData(geojsonInput);
-            map.fitBounds(myImportedLayers.getBounds());
+            let geojsonInput = JSON.parse(fileData.target.result);
+            let selectedLayer = layerSelectionMapping[importTypeSelect.value];
+            selectedLayer.addData(geojsonInput);
+            map.fitBounds(selectedLayer.getBounds());
         };
         fr.readAsText(fileInput.files[i])
     }
@@ -46,13 +100,13 @@ function exportShapes() {
     if (fileName === null || fileName.length == 0) {
         return;
     }
-    
+
     if (document.getElementById("checkDrawnOnly").checked) {
-        var dataExport = JSON.stringify(map.pm.getGeomanDrawLayers(true).toGeoJSON());
+        var dataExport = JSON.stringify(layerSelectionMapping[importTypeSelect.value].toGeoJSON());
     } else {
         var dataExport = JSON.stringify(map.pm.getGeomanLayers(true).toGeoJSON());
     }
-    
+
     var pom = document.createElement('a');
     pom.setAttribute('href', 'data:application/geo+json;charset=utf-8,' + encodeURIComponent(dataExport));
     pom.setAttribute('download', fileName);
@@ -71,21 +125,37 @@ var legend = L.control({
 legend.onAdd = function(map) {
     this._div = L.DomUtil.create('div', 'info legend');
     this._div.innerHTML =
-        '<h4>Data transfer</h4><table>' +
-        '<tr><td colspan="2"><input style="font-size: 9px;" type="file" id="fileInput" accept=".geojson,application/json,application/geo+json" multiple></td></tr>' +
+        '<h4>Data transfer and drawing</h4><table>' +
         '<tr><td><select id="importTypeSelect">' +
-        '<option selected value="unknown">unknown</option>' +
-        '<option value="project">project</option>' +
+        '<option selected value="other">other</option>' +
         '<option value="boundaries">boundaries</option>' +
         '<option value="plan">plan</option>' +
         '<option value="protocol">protocol</option>' +
-        '</select></td><td>import type</td></tr>' +
-        '<tr><td><button onclick="importShapes();">import</button></td><td><input type="checkbox" id="checkReplaceShapes">&nbsp;and replace</td></tr>' +
+        '</select></td><td>layer type</td></tr>' +
+        '<tr><td colspan="2"><input style="font-size: 9px;" type="file" id="fileInput" ' +
+        'accept=".geojson,application/json,application/geo+json" multiple></td></tr>' +
+        '<tr><td><button onclick="importShapes();">import</button></td><td>' +
+        '<input type="checkbox" id="checkReplaceShapes">&nbsp;and replace</td></tr>' +
         '<tr><td><button onclick="exportShapes();">export</button></td>' +
-        '<td><input type="checkbox" id="checkDrawnOnly">&nbsp;drawn only</td></tr>'
-        '</table>';
+        '<td><input type="checkbox" id="checkDrawnOnly">&nbsp;selected only</td></tr>'
+    '</table>';
     L.DomEvent.disableClickPropagation(this._div);
     return this._div;
 };
 
-legend.addTo(map)
+legend.addTo(map);
+const importTypeSelect = document.getElementById("importTypeSelect");
+const layerSelectionMapping = {
+    "other": otherLayers,
+    "boundaries": boundariesLayer,
+    "plan": planLayer,
+    "protocol": protocolLayer
+};
+
+function refreshImportLayerSelection() {
+    map.pm.setGlobalOptions({
+        layerGroup: layerSelectionMapping[importTypeSelect.value],
+    });
+}
+importTypeSelect.onchange = refreshImportLayerSelection;
+refreshImportLayerSelection();
