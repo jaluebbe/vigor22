@@ -15,7 +15,17 @@ function styleShape(feature, styleProperties) {
     return styleProperties;
 }
 
-var otherLayers = L.layerGroup().addTo(map);
+var otherLayers = L.geoJSON([], {
+    onEachFeature: onEachFeature,
+    style: function(feature) {
+        return styleShape(feature, {
+            fillColor: "#ff0000",
+            fillOpacity: 0.1,
+            weight: 1.5,
+            color: "grey"
+        });
+    }
+}).addTo(map);
 var boundariesLayer = L.geoJSON([], {
     onEachFeature: onEachFeature,
     style: function(feature) {
