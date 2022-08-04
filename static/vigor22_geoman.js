@@ -1,3 +1,12 @@
+map.createPane('other');
+map.createPane('boundaries');
+map.createPane('plan');
+map.createPane('protocol');
+map.getPane('boundaries').style.zIndex = 390;
+map.getPane('plan').style.zIndex = 391;
+map.getPane('protocol').style.zIndex = 392;
+map.getPane('other').style.zIndex = 393;
+
 function onEachFeature(feature, layer) {
     layer.on('click', function(eo) {
         clickedShape(eo);
@@ -17,6 +26,7 @@ function styleShape(feature, styleProperties) {
 
 var otherLayers = L.geoJSON([], {
     onEachFeature: onEachFeature,
+    pane: 'other',
     style: function(feature) {
         return styleShape(feature, {
             fillColor: "#ff0000",
@@ -28,6 +38,7 @@ var otherLayers = L.geoJSON([], {
 }).addTo(map);
 var boundariesLayer = L.geoJSON([], {
     onEachFeature: onEachFeature,
+    pane: 'boundaries',
     style: function(feature) {
         return styleShape(feature, {
             fillColor: "#003399",
@@ -39,6 +50,7 @@ var boundariesLayer = L.geoJSON([], {
 }).addTo(map);
 var planLayer = L.geoJSON([], {
     onEachFeature: onEachFeature,
+    pane: 'plan',
     style: function(feature) {
         return styleShape(feature, {
             fillColor: "#ffcc00",
@@ -50,6 +62,7 @@ var planLayer = L.geoJSON([], {
 }).addTo(map);
 var protocolLayer = L.geoJSON([], {
     onEachFeature: onEachFeature,
+    pane: 'protocol',
     style: function(feature) {
         return styleShape(feature, {
             fillColor: "#00ee00",
@@ -90,15 +103,15 @@ map.on('pm:create', function(e) {
 
 
 function importShapes() {
+    var selectedLayer = layerSelectionMapping[importTypeSelect.value];
     if (document.getElementById("checkReplaceShapes").checked) {
-        myImportedLayers.clearLayers();
+        selectedLayer.clearLayers();
     }
     let fileInput = document.getElementById("fileInput");
     for (var i = 0; i < fileInput.files.length; i++) {
         var fr = new FileReader();
         fr.onload = function(fileData) {
             let geojsonInput = JSON.parse(fileData.target.result);
-            let selectedLayer = layerSelectionMapping[importTypeSelect.value];
             selectedLayer.addData(geojsonInput);
             map.fitBounds(selectedLayer.getBounds());
         };
