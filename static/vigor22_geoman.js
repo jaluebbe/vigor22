@@ -74,10 +74,11 @@ var protocolLayer = L.geoJSON([], {
         });
     }
 }).addTo(map);
-layerControl.addOverlay(otherLayers, "other layers");
+var otherLayersLabel = "<span style='background-color:rgba(255, 0, 0, 0.2)'>other layers</span>";
 var boundariesLayerLabel = "<span style='background-color:rgba(0, 51, 153, 0.2)'>Boundaries</span>";
 var planLayerLabel = "<span style='background-color:rgba(255, 204, 0, 0.2)'>Plan</span>";
 var protocolLayerLabel = "<span style='background-color:rgba(0, 238, 0, 0.2)'>Protocol</span>";
+layerControl.addOverlay(otherLayers, otherLayersLabel);
 layerControl.addOverlay(boundariesLayer, boundariesLayerLabel);
 layerControl.addOverlay(planLayer, planLayerLabel);
 layerControl.addOverlay(protocolLayer, protocolLayerLabel);
