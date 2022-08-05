@@ -185,6 +185,9 @@ const layerSelectionMapping = {
 };
 
 function refreshImportLayerSelection() {
+    map.pm.disableGlobalEditMode();
+    map.pm.disableGlobalRotateMode();
+    map.pm.disableGlobalRemovalMode();
     var activeLayer = layerSelectionMapping[importTypeSelect.value];
     Object.values(layerSelectionMapping).forEach(layer => {
         if (layer == activeLayer) {
