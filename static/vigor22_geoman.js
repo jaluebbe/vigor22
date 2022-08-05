@@ -7,13 +7,15 @@ map.getPane('plan').style.zIndex = 391;
 map.getPane('protocol').style.zIndex = 392;
 map.getPane('other').style.zIndex = 393;
 
+function formatTooltip(content) {
+    return "<pre>" + JSON.stringify(content, undefined, 2) + "</pre>";
+}
+
 function onEachFeature(feature, layer) {
     layer.on('click', function(eo) {
         clickedShape(eo);
     });
-    var tooltipContent =
-        "<pre>" + JSON.stringify(feature.properties, undefined, 2) + "</pre>";
-    layer.bindTooltip(tooltipContent, {
+    layer.bindTooltip(formatTooltip(feature.properties), {
         sticky: true,
         direction: "top",
         offset: [0, -5]
@@ -101,6 +103,12 @@ map.on('pm:create', function(e) {
     })
 });
 
+map.on('pm:cut', function(eo) {
+    if (eo.layer.feature !== undefined) {
+        eo.layer.feature.properties = eo.originalLayer.feature.properties;
+        eo.layer.setTooltipContent(formatTooltip(eo.layer.feature.properties));
+    }
+})
 
 function importShapes() {
     var selectedLayer = layerSelectionMapping[importTypeSelect.value];
@@ -177,8 +185,26 @@ const layerSelectionMapping = {
 };
 
 function refreshImportLayerSelection() {
+    var activeLayer = layerSelectionMapping[importTypeSelect.value];
+    Object.values(layerSelectionMapping).forEach(layer => {
+        if (layer == activeLayer) {
+            layer.pm.setOptions({
+                allowCutting: true,
+                allowRemoval: true,
+                allowEditing: true,
+                allowRotation: true
+            });
+        } else {
+            layer.pm.setOptions({
+                allowCutting: false,
+                allowRemoval: false,
+                allowEditing: false,
+                allowRotation: false
+            });
+        }
+    });
     map.pm.setGlobalOptions({
-        layerGroup: layerSelectionMapping[importTypeSelect.value],
+        layerGroup: activeLayer,
     });
 }
 importTypeSelect.onchange = refreshImportLayerSelection;
