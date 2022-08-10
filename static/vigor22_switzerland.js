@@ -46,12 +46,12 @@ var swisstopo_bodenneigung_gruendigkeit = L.tileLayer.swiss({
 L.control.scale({
     'imperial': false
 }).addTo(map);
-baseLayers = {
+var baseLayers = {
     "Map of Switzerland": swisstopo_NationalMapColor,
     "Aerial view of Switzerland": swisstopo_SWISSIMAGE
 };
 
-otherLayers = {};
+var otherLayers = {};
 otherLayers[addLegend("ch.blw.erosion", "Erosion risk for arable land")] = swisstopo_erosion;
 otherLayers[addLegend("ch.bafu.naqua-grundwasser_nitrat", "Nitrates in groundwater")] = swisstopo_grundwasser_nitrat;
 otherLayers[addLegend("ch.blw.bodeneignung-gruendigkeit", "Root penetration dept")] =
@@ -63,4 +63,4 @@ var layerControl = L.control.layers(baseLayers, otherLayers, {
     collapsed: L.Browser.mobile, // hide on mobile devices
     position: 'topright'
 }).addTo(map);
-map.setView([47.315, 8.205], 20)
+map.setView([47.315, 8.205], 20);
