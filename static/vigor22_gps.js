@@ -10,8 +10,8 @@ info.showText = function(infoText) {
     this._div.innerHTML = infoText;
 };
 info.updateContent = function(heading, speed) {
-    this._div.innerHTML = "<div style='text-align: left;'>heading&nbsp;" + heading +
-        "&nbsp;deg<br>speed&nbsp;" + speed + "&nbsp;m/s</div>";
+    this._div.innerHTML = "<div style='text-align: left;'>heading:&nbsp;" + Math.round(heading * 100) / 100 +
+        "&nbsp;deg<br>speed:&nbsp;" + Math.round(speed * 100) / 100 + "&nbsp;m/s</div>";
 };
 info.addTo(map);
 var myMarker = L.marker([], {
