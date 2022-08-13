@@ -41,11 +41,12 @@ function onLocationFound(e) {
     if (!map.getBounds().contains(e.latlng)) {
         map.setView(e.latlng);
     }
-    info.updateContent(e.heading, e.speed);
     var centerPoint = turf.point([e.longitude, e.latitude]);
     if (e.heading === undefined) {
+        info.showText('Speed and heading unavailable.');
         myPolyline.setLatLngs([]);
     } else {
+        info.updateContent(e.heading, e.speed);
         var frontPoint = turf.destination(centerPoint, 5e-3, e.heading);
         var leftPoint = turf.destination(centerPoint, 15e-3, e.heading - 90);
         var rightPoint = turf.destination(centerPoint, 15e-3, e.heading + 90);
