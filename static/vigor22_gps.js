@@ -60,23 +60,19 @@ function onLocationFound(e) {
         var frontPoint = turf.destination(centerPoint, 5e-3, e.heading);
         var leftPoint = turf.destination(centerPoint, 15e-3, e.heading - 90);
         var rightPoint = turf.destination(centerPoint, 15e-3, e.heading + 90);
-        var leftAreaPoints = leftPolygon.getLatLngs().filter(el => {
-            return el != null && el.length != 0;
-        });
-        leftAreaPoints.push(leftPoint.geometry.coordinates.reverse());
-        leftAreaPoints.unshift(centerPoint.geometry.coordinates.reverse());
-        leftPolygon.setLatLngs(leftAreaPoints);
-        var rightAreaPoints = rightPolygon.getLatLngs().filter(el => {
-            return el != null && el.length != 0;
-        });
-        rightAreaPoints.push(rightPoint.geometry.coordinates.reverse());
-        rightAreaPoints.unshift(centerPoint.geometry.coordinates.reverse());
-        rightPolygon.setLatLngs(rightAreaPoints);
         myPolyline.setLatLngs([
             [centerPoint.geometry.coordinates.reverse(), frontPoint.geometry.coordinates.reverse()],
             [centerPoint.geometry.coordinates.reverse(), leftPoint.geometry.coordinates.reverse()],
             [centerPoint.geometry.coordinates.reverse(), rightPoint.geometry.coordinates.reverse()]
         ]);
+        var leftAreaPoints = leftPolygon.getLatLngs();
+        leftAreaPoints[0].push(leftPoint.geometry.coordinates.reverse());
+        leftAreaPoints[0].unshift(centerPoint.geometry.coordinates.reverse());
+        leftPolygon.setLatLngs(leftAreaPoints);
+        var rightAreaPoints = rightPolygon.getLatLngs();
+        rightAreaPoints[0].push(rightPoint.geometry.coordinates.reverse());
+        rightAreaPoints[0].unshift(centerPoint.geometry.coordinates.reverse());
+        rightPolygon.setLatLngs(rightAreaPoints);
     }
 }
 
