@@ -61,13 +61,13 @@ function onLocationFound(e) {
         var leftPoint = turf.destination(centerPoint, 15e-3, e.heading - 90);
         var rightPoint = turf.destination(centerPoint, 15e-3, e.heading + 90);
         var leftAreaPoints = leftPolygon.getLatLngs().filter(el => {
-            return el != null && el.length == 2;
+            return el != null && el.length != 0;
         });
         leftAreaPoints.push(leftPoint.geometry.coordinates.reverse());
         leftAreaPoints.unshift(centerPoint.geometry.coordinates.reverse());
         leftPolygon.setLatLngs(leftAreaPoints);
         var rightAreaPoints = rightPolygon.getLatLngs().filter(el => {
-            return el != null && el.length == 2;
+            return el != null && el.length != 0;
         });
         rightAreaPoints.push(rightPoint.geometry.coordinates.reverse());
         rightAreaPoints.unshift(centerPoint.geometry.coordinates.reverse());
