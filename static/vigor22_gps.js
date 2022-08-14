@@ -26,6 +26,14 @@ var myPolyline = L.polyline([], {
     color: 'red',
     pmIgnore: true
 });
+var leftPolygon = L.polygon([], {
+    color: 'green',
+    pmIgnore: true
+});
+var rightPolygon = L.polygon([], {
+    color: 'green',
+    pmIgnore: true
+});
 
 
 function onLocationFound(e) {
@@ -37,6 +45,8 @@ function onLocationFound(e) {
         myMarker.addTo(map);
         myCircle.addTo(map);
         myPolyline.addTo(map);
+        leftPolygon.addTo(map);
+        rightPolygon.addTo(map);
     }
     if (!map.getBounds().contains(e.latlng)) {
         map.setView(e.latlng);
@@ -50,6 +60,14 @@ function onLocationFound(e) {
         var frontPoint = turf.destination(centerPoint, 5e-3, e.heading);
         var leftPoint = turf.destination(centerPoint, 15e-3, e.heading - 90);
         var rightPoint = turf.destination(centerPoint, 15e-3, e.heading + 90);
+        var leftAreaPoints = leftPolygon.getLatLngs();
+        leftAreaPoints.push(leftPoint.geometry.coordinates.reverse());
+        leftAreaPoints.unshift(centerPoint.geometry.coordinates.reverse());
+        leftPolygon.setLatLngs(leftAreaPoints);
+        var rightAreaPoints = rightPolygon.getLatLngs();
+        rightAreaPoints.push(rightPoint.geometry.coordinates.reverse());
+        rightAreaPoints.unshift(centerPoint.geometry.coordinates.reverse());
+        rightPolygon.setLatLngs(rightAreaPoints);
         myPolyline.setLatLngs([
             [centerPoint.geometry.coordinates.reverse(), frontPoint.geometry.coordinates.reverse()],
             [centerPoint.geometry.coordinates.reverse(), leftPoint.geometry.coordinates.reverse()],
