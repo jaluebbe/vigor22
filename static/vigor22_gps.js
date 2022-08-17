@@ -1,3 +1,7 @@
+map.createPane('active');
+map.createPane('vehicle');
+map.getPane('active').style.zIndex = 394;
+map.getPane('vehicle').style.zIndex = 395;
 var info = L.control({
     position: 'bottomright'
 });
@@ -26,16 +30,17 @@ var myCircle = L.circle([], {
     pmIgnore: true
 });
 var myPolyline = L.polyline([], {
+    pane: 'vehicle',
     color: 'red',
     pmIgnore: true
 });
 var leftPolygon = L.polygon([], {
-    zIndexOffset: 394,
+    pane: 'active',
     color: 'green',
     pmIgnore: true
 });
 var rightPolygon = L.polygon([], {
-    zIndexOffset: 394,
+    pane: 'active',
     color: 'green',
     pmIgnore: true
 });
@@ -63,57 +68,40 @@ function onLocationFound(e) {
     if (typeof e.heading === "undefined") {
         info.showText('Speed and heading unavailable.');
         myPolyline.setLatLngs([]);
-        leftPolygon.setLatLngs([]);
     } else if (e.speed < 1) {
         info.showText('' + Math.round(e.speed * 100) / 100 + '&nbsp;m/s is too slow.');
+        if (!leftPolygon.isEmpty()) {
+            protocolLayer.addData(leftPolygon.toGeoJSON());
+            leftPolygon.setLatLngs([]);
+        }
+        if (!rightPolygon.isEmpty()) {
+            protocolLayer.addData(rightPolygon.toGeoJSON());
+            rightPolygon.setLatLngs([]);
+        }
     } else {
         info.updateContent(e.heading, e.speed);
         let frontPoint = turf.destination(centerPoint, 5e-3, e.heading);
         let leftPoint = turf.destination(centerPoint, 15e-3, e.heading - 90);
         let rightPoint = turf.destination(centerPoint, 15e-3, e.heading + 90);
         myPolyline.setLatLngs([
-            [{
-                lat: centerPoint.geometry.coordinates[1],
-                lng: centerPoint.geometry.coordinates[0]
-            }, {
-                lat: frontPoint.geometry.coordinates[1],
-                lng: frontPoint.geometry.coordinates[0]
-            }],
-            [{
-                lat: centerPoint.geometry.coordinates[1],
-                lng: centerPoint.geometry.coordinates[0]
-            }, {
-                lat: leftPoint.geometry.coordinates[1],
-                lng: leftPoint.geometry.coordinates[0]
-            }],
-            [{
-                lat: centerPoint.geometry.coordinates[1],
-                lng: centerPoint.geometry.coordinates[0]
-            }, {
-                lat: rightPoint.geometry.coordinates[1],
-                lng: rightPoint.geometry.coordinates[0]
-            }]
+            [centerPoint.geometry.coordinates.slice().reverse(),
+                frontPoint.geometry.coordinates.slice().reverse()
+            ],
+            [centerPoint.geometry.coordinates.slice().reverse(),
+                leftPoint.geometry.coordinates.slice().reverse()
+            ],
+            [centerPoint.geometry.coordinates.slice().reverse(),
+                rightPoint.geometry.coordinates.slice().reverse()
+            ]
         ]);
         let leftAreaPoints = leftPolygon.getLatLngs();
-        leftAreaPoints[0].push({
-            lng: leftPoint.geometry.coordinates[0],
-            lat: leftPoint.geometry.coordinates[1]
-        });
-        leftAreaPoints[0].unshift({
-            lng: centerPoint.geometry.coordinates[0],
-            lat: centerPoint.geometry.coordinates[1]
-        });
+        leftAreaPoints[0].push(leftPoint.geometry.coordinates.slice().reverse());
+        leftAreaPoints[0].unshift(centerPoint.geometry.coordinates.slice().reverse());
         leftPolygon.setLatLngs(leftAreaPoints);
         myMarker._tooltip.setContent('' + Math.round(e.speed * 100) / 100 + '&nbsp;m/s');
         let rightAreaPoints = rightPolygon.getLatLngs();
-        rightAreaPoints[0].push({
-            lng: rightPoint.geometry.coordinates[0],
-            lat: rightPoint.geometry.coordinates[1]
-        });
-        rightAreaPoints[0].unshift({
-            lng: centerPoint.geometry.coordinates[0],
-            lat: centerPoint.geometry.coordinates[1]
-        });
+        rightAreaPoints[0].push(rightPoint.geometry.coordinates.slice().reverse());
+        rightAreaPoints[0].unshift(centerPoint.geometry.coordinates.slice().reverse());
         rightPolygon.setLatLngs(rightAreaPoints);
     }
 }
