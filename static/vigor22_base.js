@@ -9,10 +9,12 @@ var wmsLayer = L.tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus_open'
     format: 'image/png',
     transparent: true,
     minZoom: 1,
+    maxZoom: 19,
     attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2019, ' +
         '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
 });
 var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 var swisstopo_NationalMapColor = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg', {
