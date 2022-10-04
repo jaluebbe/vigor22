@@ -1,0 +1,11 @@
+name: vigor22
+dependencies:
+  - python=3
+  - gunicorn
+  - geopandas
+  - pip
+  - pip:
+    - fastapi
+    - uvicorn
+    - aiofiles
+    - python-multipart

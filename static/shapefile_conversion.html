@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>Vigor 22 - Shapefile conversion</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+    <link rel="stylesheet" href="vigor22.css">
+    <style>
+        .tooltip-grid-container {
+            display: grid;
+            grid-template-columns: auto auto;
+            column-gap: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <template id="shapeInputTemplate">
+        <form name="shapeInputForm" onsubmit="return false;">
+            <div class="grid-container">
+                <h4>Shapefile conversion</h4>
+                <input id="fileInput" name="fileInput" type="file" multiple>
+                <div><select id="inputCrs" name="inputCrs">
+                        <option selected value="EPSG:4326">WGS84</option>
+                        <option value="EPSG:25832">ETRS89</option>
+                        <option value="EPSG:2056">CH1903+/LV95</option>
+                        <option value="EPSG:4269">NAD83</option>
+                        <option value="EPSG:27700">OSGB36</option>
+                    </select>&nbsp;<label for="inputCrs">Geodetic CRS</label></div>
+                <button onclick="importShapes();" id="importButton" name="importButton">Import shape</button>
+                <button onclick="exportShapes();" id="exportButton" name="exportButton" disabled>Export GeoJSON</button>
+            </div>
+        </form>
+    </template>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js" integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s=" crossorigin=""></script>
+    <script type="text/javascript" src="shapefile_conversion.js"></script>
+</body>
+
+</html>
