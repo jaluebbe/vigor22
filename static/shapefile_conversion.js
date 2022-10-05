@@ -99,7 +99,8 @@ function exportShapes() {
         return;
     }
     var pom = document.createElement('a');
-    pom.setAttribute('href', 'data:application/geo+json;charset=utf-8,' + encodeURIComponent(importLayers.toGeoJSON()));
+    let exportData = JSON.stringify(importLayers.toGeoJSON());
+    pom.setAttribute('href', 'data:application/geo+json;charset=utf-8,' + encodeURIComponent(exportData));
     pom.setAttribute('download', fileName);
     if (document.createEvent) {
         var event = document.createEvent('MouseEvents');
