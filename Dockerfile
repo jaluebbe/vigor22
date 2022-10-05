@@ -13,4 +13,6 @@ RUN apt-get update && \
 COPY ./static /code/static
 COPY ./backend_fastapi.py /code/
 
+EXPOSE 80
+
 CMD ["uvicorn", "backend_fastapi:app", "--host", "0.0.0.0", "--port", "80"]
