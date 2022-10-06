@@ -28,7 +28,7 @@ function styleShape(feature, styleProperties) {
 
 var map = L.map('map');
 var openTopoMap = L.tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus_open', {
-    layers: 'web_scale',
+    layers: 'web_scale_grau',
     maxZoom: 19,
     attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2021, ' +
         '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
@@ -37,11 +37,11 @@ map.attributionControl.addAttribution('<a href="https://github.com/jaluebbe/vigo
 // add link to an imprint and a privacy statement if the file is available.
 function addPrivacyStatement() {
     var xhr = new XMLHttpRequest();
-    xhr.open('HEAD', "./static/datenschutz.html");
+    xhr.open('HEAD', "./datenschutz.html");
     xhr.onload = function() {
         if (xhr.status === 200)
             map.attributionControl.addAttribution(
-                '<a href="./static/datenschutz.html" target="_blank">Impressum & Datenschutzerkl&auml;rung</a>'
+                '<a href="./datenschutz.html" target="_blank">Impressum & Datenschutzerkl&auml;rung</a>'
             );
     }
     xhr.send();
