@@ -13,7 +13,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.post("/api/convert_shape_files/")
 async def convert_shape_files(files: list[UploadFile], input_crs: str = Form()):
     shapefiles = [
-        file.filename for file in files if file.filename.endswith(".shp")
+        file.filename
+        for file in files
+        if file.filename[-4:].lower() in (".shp", ".zip")
     ]
     with tempfile.TemporaryDirectory() as dir_name:
         for file in files:
