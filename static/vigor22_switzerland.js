@@ -15,6 +15,9 @@ function addLegend(layerName, layerLabel) {
 var swisstopo_NationalMapColor = L.tileLayer.swiss({
     "layer": "ch.swisstopo.pixelkarte-farbe"
 }).addTo(map);
+var swisstopo_NationalMapGrey = L.tileLayer.swiss({
+    "layer": "ch.swisstopo.pixelkarte-grau"
+});
 var swisstopo_SWISSIMAGE = L.tileLayer.swiss({
     "layer": "ch.swisstopo.swissimage"
 });
@@ -48,6 +51,7 @@ L.control.scale({
 }).addTo(map);
 var baseLayers = {
     "Map of Switzerland": swisstopo_NationalMapColor,
+    "Map of Switzerland (grey)": swisstopo_NationalMapGrey,
     "Aerial view of Switzerland": swisstopo_SWISSIMAGE
 };
 
