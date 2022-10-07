@@ -43,6 +43,24 @@
         </form>
     </template>
     <div id="map"></div>
+    <div class="navbar" id="myNavbar">
+        <a href="./shapefile_conversion.html" class="active">Shapefile conversion</a>
+        <a href="./editor_geoman.html">Editor</a>
+        <a href="./editor_geoman_switzerland.html">Editor (CH)</a>
+        <a href="./gps_map.html">GPS map</a>
+        <a href="./review.html">Review</a>
+        <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="myFunction()">&#9776;</a>
+    </div>
+    <script>
+        function myFunction() {
+            var x = document.getElementById("myNavbar");
+            if (x.className === "navbar") {
+                x.className += " responsive";
+            } else {
+                x.className = "navbar";
+            }
+        }
+    </script>
     <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js" integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s=" crossorigin=""></script>
     <script src="shapefile_conversion.js"></script>
 </body>
