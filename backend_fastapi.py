@@ -2,12 +2,18 @@ import tempfile
 import os
 from fastapi import FastAPI, Form, UploadFile
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 import uvicorn
 import geopandas
 import json
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse("/static/shapefile_conversion.html")
 
 
 @app.post("/api/convert_shape_files/")
