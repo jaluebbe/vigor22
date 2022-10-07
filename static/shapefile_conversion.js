@@ -1,3 +1,5 @@
+map.addLayer(wmsTopPlusOpenGrey);
+
 var exportName = "from_shapefile";
 
 function getDateString() {
@@ -109,5 +111,3 @@ function saveAsPlan() {
 shapeInputForm.fileInput.onchange = () => {
     importShapes();
 }
-
-map.addLayer(wmsTopPlusOpenGrey)
