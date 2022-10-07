@@ -9,3 +9,4 @@ dependencies:
     - uvicorn
     - aiofiles
     - python-multipart
+    - owslib
