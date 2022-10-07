@@ -49,6 +49,11 @@ function addPrivacyStatement() {
 addPrivacyStatement();
 var importLayers = L.geoJSON([], {
     onEachFeature: onEachFeature,
+    pointToLayer: function(geoJsonPoint, latlng) {
+        return L.circleMarker(latlng, {
+             radius: 5
+        });
+    },
     style: function(feature) {
         return styleShape(feature, {
             fillColor: "#0000ff",
