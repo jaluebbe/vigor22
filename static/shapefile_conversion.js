@@ -26,32 +26,11 @@ function styleShape(feature, styleProperties) {
     return styleProperties;
 }
 
-var map = L.map('map');
-var openTopoMap = L.tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus_open', {
-    layers: 'web_scale_grau',
-    maxZoom: 19,
-    attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2021, ' +
-        '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
-}).addTo(map);
-map.attributionControl.addAttribution('<a href="https://github.com/jaluebbe/vigor22">Source on GitHub</a>');
-// add link to an imprint and a privacy statement if the file is available.
-function addPrivacyStatement() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('HEAD', "./datenschutz.html");
-    xhr.onload = function() {
-        if (xhr.status === 200)
-            map.attributionControl.addAttribution(
-                '<a href="./datenschutz.html" target="_blank">Impressum & Datenschutzerkl&auml;rung</a>'
-            );
-    }
-    xhr.send();
-}
-addPrivacyStatement();
 var importLayers = L.geoJSON([], {
     onEachFeature: onEachFeature,
     pointToLayer: function(geoJsonPoint, latlng) {
         return L.circleMarker(latlng, {
-             radius: 5
+            radius: 5
         });
     },
     style: function(feature) {
@@ -72,9 +51,8 @@ legend.onAdd = function(map) {
     this._div.appendChild(tempSource.content.cloneNode(true));
     L.DomEvent.disableClickPropagation(this._div);
     return this._div;
-};
+}
 legend.addTo(map);
-map.setView([52.52, 7.3], 13);
 
 function importShapes() {
     const files = shapeInputForm.fileInput.files;
@@ -88,6 +66,8 @@ function importShapes() {
     const xhr = new XMLHttpRequest();
     xhr.onload = () => {
         shapeInputForm.exportButton.disabled = false;
+        shapeInputForm.saveAsBoundariesButton.disabled = false;
+        shapeInputForm.saveAsPlanButton.disabled = false;
         importLayers.clearLayers();
         jsonResponse = JSON.parse(xhr.responseText);
         exportName = jsonResponse.file_name;
@@ -114,7 +94,20 @@ function exportShapes() {
     } else {
         pom.click();
     }
-};
+}
+
+function saveAsBoundaries() {
+    let saveData = JSON.stringify(importLayers.toGeoJSON());
+    localStorage.setItem('vigor22:boundaries', saveData);
+}
+
+function saveAsPlan() {
+    let saveData = JSON.stringify(importLayers.toGeoJSON());
+    localStorage.setItem('vigor22:plan', saveData);
+}
+
 shapeInputForm.fileInput.onchange = () => {
     importShapes();
 }
+
+map.addLayer(wmsTopPlusOpenGrey)

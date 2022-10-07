@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css" integrity="sha384-kxXhFDZB0L84bBV/apPOb8zGC+fsQ1dBPpKXPUXc1zRymi4BaueVyC27iDDPdssp" crossorigin="anonymous">
     <link rel="stylesheet" href="vigor22.css">
     <style>
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 5px;
+        }
+
         .tooltip-grid-container {
             display: grid;
             grid-template-columns: auto auto;
@@ -39,6 +45,8 @@
                     </select>&nbsp;<label for="inputCrs">Geodetic CRS</label></div>
                 <button onclick="importShapes();" id="importButton" name="importButton">Import shape</button>
                 <button onclick="exportShapes();" id="exportButton" name="exportButton" disabled>Export GeoJSON</button>
+                <div class="two-columns"><button onclick="saveAsBoundaries();" id="saveAsBoundariesButton" name="saveAsBoundariesButton" disabled>Save as boundaries</button>
+                <button onclick="saveAsPlan();" id="saveAsPlanButton" name="saveAsPlanButton" disabled>Save as plan</button></div>
             </div>
         </form>
     </template>
@@ -62,6 +70,7 @@
         }
     </script>
     <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js" integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s=" crossorigin=""></script>
+    <script src="vigor22_base.js"></script>
     <script src="shapefile_conversion.js"></script>
 </body>
 
