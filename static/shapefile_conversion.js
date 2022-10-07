@@ -1,5 +1,3 @@
-map.addLayer(wmsTopPlusOpenGrey);
-
 var exportName = "from_shapefile";
 
 function getDateString() {
