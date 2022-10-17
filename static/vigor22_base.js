@@ -26,6 +26,13 @@ var wmsTopPlusOpenGrey = L.tileLayer.wms('https://sgx.geodatenzentrum.de/wms_top
     attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2021, ' +
         '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
 });
+var topPlusOpenOffline = L.tileLayer('/api/mbtiles/topplus_open/{z}/{x}/{y}.png', {
+    minZoom: 0,
+    maxNativeZoom: 16,
+    maxZoom: 19,
+    attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2022, ' +
+        '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
+});
 var swisstopo_NationalMapColor = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg', {
     attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
     minZoom: 7,
@@ -50,7 +57,8 @@ L.control.scale({
 }).addTo(map);
 var baseLayers = {
     "TopPlusOpen": wmsTopPlusOpen,
-    "TopPlusOpen (grey)": wmsTopPlusOpenGrey,
+    "<span style='color: gray'>TopPlusOpen (grey)</span>": wmsTopPlusOpenGrey,
+    "TopPlusOpen (offline)": topPlusOpenOffline,
     "Map of Switzerland": swisstopo_NationalMapColor,
     "Aerial view of Switzerland": swisstopo_SWISSIMAGE
 };
