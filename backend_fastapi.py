@@ -1,5 +1,6 @@
 import tempfile
 import os
+import re
 from fastapi import FastAPI, Form, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, Response
@@ -8,6 +9,8 @@ import geopandas
 import json
 import sqlite3
 from mbtiles import y_tile2row
+
+epsg_pattern = re.compile("^(?:EPSG|epsg):[0-9]{4,5}$")
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -36,9 +39,11 @@ async def convert_shape_files(files: list[UploadFile], input_crs: str = Form()):
         myshpfile = geopandas.read_file(os.path.join(dir_name, file_name))
         if myshpfile.crs is not None:
             original_crs = myshpfile.crs.srs
+            if epsg_pattern.match(original_crs) is None:
+                myshpfile = myshpfile.set_crs(input_crs)
         else:
             original_crs = None
-        myshpfile = myshpfile.set_crs(input_crs)
+            myshpfile = myshpfile.set_crs(input_crs)
         return {
             "file_name": os.path.splitext(file_name)[0],
             "geojson": json.loads(myshpfile.to_crs("EPSG:4326").to_json()),
