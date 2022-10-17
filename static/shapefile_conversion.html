@@ -45,19 +45,20 @@
                     </select>&nbsp;<label for="inputCrs">Geodetic CRS</label></div>
                 <button onclick="importShapes();" id="importButton" name="importButton">Import shape</button>
                 <button onclick="exportShapes();" id="exportButton" name="exportButton" disabled>Export GeoJSON</button>
-                <div class="two-columns"><button onclick="saveAsBoundaries();" id="saveAsBoundariesButton" name="saveAsBoundariesButton" disabled>Save as boundaries</button>
-                <button onclick="saveAsPlan();" id="saveAsPlanButton" name="saveAsPlanButton" disabled>Save as plan</button></div>
+                <div class="two-columns"><button onclick="saveAsBoundaries();" id="saveAsBoundariesButton" name="saveAsBoundariesButton" disabled>Save boundaries</button>
+                    <button onclick="saveAsPlan();" id="saveAsPlanButton" name="saveAsPlanButton" disabled>Save plan</button>
+                </div>
             </div>
         </form>
     </template>
     <div id="map"></div>
     <div class="navbar" id="myNavbar">
         <a href="./shapefile_conversion.html" class="active">Shapefile conversion</a>
-        <a href="./editor_geoman.html">Editor</a>
-        <a href="./editor_geoman_switzerland.html">Editor (CH)</a>
-        <a href="./gps_map.html">GPS map</a>
-        <a href="./review.html">Review</a>
-        <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="myFunction()">&#9776;</a>
+        <a href="./editor_geoman.html"><img height="12" src="flag_of_germany.svg" alt="DE" /> Editor</a>
+        <a href="./editor_geoman_switzerland.html"><a href="./editor_geoman_switzerland.html"><img height="12" src="flag_of_switzerland.svg" alt="CH" /> Editor</a>
+            <a href="./gps_map.html">GPS map</a>
+            <a href="./review.html">Review</a>
+            <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="myFunction()">&#9776;</a>
     </div>
     <script>
         function myFunction() {
