@@ -1,70 +1,60 @@
-var map = L.map('map', {
-    crs: L.CRS.EPSG2056
-});
-map.attributionControl.addAttribution(
-    '<a href="https://github.com/jaluebbe/vigor22">Source on GitHub</a>');
-// add link to privacy statement
-//map.attributionControl.addAttribution(
-//    '<a href="static/datenschutz.html" target="_blank">Datenschutzerkl&auml;rung</a>');
-function addLegend(layerName, layerLabel) {
+function addSwisstopoLegend(layerName, layerLabel) {
     if (layerLabel === undefined)
         layerLabel = layerName;
     let apiUrl = "https://api3.geo.admin.ch/rest/services/api/MapServer/";
     return ("<a href='" + apiUrl + layerName + "/legend?lang=en' target='_blank'>" + layerLabel + "</a>");
 };
-var swisstopo_NationalMapColor = L.tileLayer.swiss({
-    "layer": "ch.swisstopo.pixelkarte-farbe"
-}).addTo(map);
-var swisstopo_NationalMapGrey = L.tileLayer.swiss({
-    "layer": "ch.swisstopo.pixelkarte-grau"
-});
-var swisstopo_SWISSIMAGE = L.tileLayer.swiss({
-    "layer": "ch.swisstopo.swissimage"
-});
-var swisstopo_bodeneignung_naehrstoffspeichervermoegen = L.tileLayer.swiss({
-    "format": "png",
-    "layer": "ch.blw.bodeneignung-naehrstoffspeichervermoegen",
-    "maxNativeZoom": "26",
-    "opacity": 0.5
-});
-var swisstopo_erosion = L.tileLayer.swiss({
-    "format": "png",
-    "layer": "ch.blw.erosion",
-    "maxNativeZoom": "26",
-    "opacity": 0.5
-});
-var swisstopo_grundwasser_nitrat =  L.tileLayer.swiss({
-    "format": "png",
-    "layer": "ch.bafu.naqua-grundwasser_nitrat",
-    "maxNativeZoom": "26",
-    "opacity": 0.5
-});
-var swisstopo_bodenneigung_gruendigkeit = L.tileLayer.swiss({
-    "format": "png",
-    "layer": "ch.blw.bodeneignung-gruendigkeit",
-    "maxNativeZoom": "26",
-    "opacity": 0.5
-});
 
-L.control.scale({
-    'imperial': false
-}).addTo(map);
-var baseLayers = {
-    "Map of Switzerland": swisstopo_NationalMapColor,
-    "Map of Switzerland (grey)": swisstopo_NationalMapGrey,
-    "Aerial view of Switzerland": swisstopo_SWISSIMAGE
+function addSwisstopoBaseLayer(layerName, layerLabel) {
+    let swisstopoBaselayerOptions = {
+        attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
+        minZoom: 7,
+        maxZoom: 19,
+        bounds: [
+            [45.398181, 5.140242],
+            [48.230651, 11.47757]
+        ]
+    };
+    let myLayer = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/' +
+        layerName + '/default/current/3857/{z}/{x}/{y}.jpeg',
+        swisstopoBaselayerOptions);;
+    layerControl.addBaseLayer(myLayer, layerLabel);
+    return myLayer;
 };
 
-var otherLayers = {};
-otherLayers[addLegend("ch.blw.erosion", "Erosion risk for arable land")] = swisstopo_erosion;
-otherLayers[addLegend("ch.bafu.naqua-grundwasser_nitrat", "Nitrates in groundwater")] = swisstopo_grundwasser_nitrat;
-otherLayers[addLegend("ch.blw.bodeneignung-gruendigkeit", "Root penetration dept")] =
-    swisstopo_bodenneigung_gruendigkeit;
-otherLayers[addLegend("ch.blw.bodeneignung-naehrstoffspeichervermoegen", "Nutrient storage capacity")] =
-    swisstopo_bodeneignung_naehrstoffspeichervermoegen;
+function addSwisstopoOverlay(layerName, layerLabel, opacity = 0.5) {
+    let myLayer = L.tileLayer.wms('https://wms.geo.admin.ch/', {
+        layers: layerName,
+        transparent: true,
+        opacity: opacity,
+        maxZoom: 19,
+        format: 'image/png',
+    });
+    layerControl.addOverlay(myLayer, addSwisstopoLegend(layerName, layerLabel));
+    return myLayer;
+};
 
-var layerControl = L.control.layers(baseLayers, otherLayers, {
-    collapsed: L.Browser.mobile, // hide on mobile devices
-    position: 'topright'
-}).addTo(map);
-map.setView([47.315, 8.205], 20);
+function addSwisstopoVectorLayer(layerName, layerLabel) {
+    let myLayer = L.maplibreGL({
+        style: 'https://vectortiles.geo.admin.ch/styles/' + layerName + '/style.json',
+        attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
+    });
+    layerControl.addBaseLayer(myLayer, layerLabel);
+    // make sure to reprint the vector map after being selected.
+    map.on('baselayerchange', function(eo) {
+        if (eo.name === layerLabel) {
+            myLayer._update();
+        }
+    });
+    return myLayer;
+};
+addSwisstopoBaseLayer("ch.swisstopo.pixelkarte-farbe", "Map of Switzerland").addTo(map);
+addSwisstopoBaseLayer("ch.swisstopo.pixelkarte-grau", "Map of Switzerland (grey)");
+
+addSwisstopoVectorLayer("ch.swisstopo.leichte-basiskarte.vt", "swisstopo light base map");
+addSwisstopoVectorLayer("ch.swisstopo.leichte-basiskarte-imagery.vt", "Aerial view of Switzerland");
+
+addSwisstopoOverlay("ch.blw.erosion", "Erosion risk for arable land");
+addSwisstopoOverlay("ch.bafu.gewaesserschutz-chemischer_zustand_nitrat", "Nitrate in waters");
+addSwisstopoOverlay("ch.blw.bodeneignung-gruendigkeit", "Root penetration dept");
+addSwisstopoOverlay("ch.blw.bodeneignung-naehrstoffspeichervermoegen", "Nutrient storage capacity");

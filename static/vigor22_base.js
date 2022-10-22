@@ -1,4 +1,7 @@
-var map = L.map('map');
+var map = L.map('map', {
+    minZoom: 7,
+    maxZoom: 19
+});
 map.attributionControl.addAttribution('<a href="https://github.com/jaluebbe/vigor22">Source on GitHub</a>');
 // add link to an imprint and a privacy statement if the file is available.
 function addPrivacyStatement() {
@@ -33,25 +36,16 @@ var topPlusOpenOffline = L.tileLayer('/api/mbtiles/topplus_open/{z}/{x}/{y}.png'
     attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2022, ' +
         '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
 });
-var swisstopo_NationalMapColor = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg', {
-    attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
-    minZoom: 7,
-    maxZoom: 19,
-    bounds: [
-        [45.398181, 5.140242],
-        [48.230651, 11.47757]
-    ]
+var openStreetMapOffline = L.maplibreGL({
+    style: 'osm_basic_style.json',
+    attribution: '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 });
-var swisstopo_SWISSIMAGE = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg', {
-    attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
-    minZoom: 7,
-    maxZoom: 19,
-    bounds: [
-        [45.398181, 5.140242],
-        [48.230651, 11.47757]
-    ]
+// make sure to reprint the vector map after being selected.
+map.on('baselayerchange', function(eo) {
+    if (eo.name === 'OpenStreetMap (offline)') {
+        openStreetMapOffline._update();
+    }
 });
-
 L.control.scale({
     'imperial': false
 }).addTo(map);
@@ -59,8 +53,7 @@ var baseLayers = {
     "TopPlusOpen": wmsTopPlusOpen,
     "<span style='color: gray'>TopPlusOpen (grey)</span>": wmsTopPlusOpenGrey,
     "TopPlusOpen (offline)": topPlusOpenOffline,
-    "Map of Switzerland": swisstopo_NationalMapColor,
-    "Aerial view of Switzerland": swisstopo_SWISSIMAGE
+    "OpenStreetMap (offline)": openStreetMapOffline,
 };
 var otherLayers = {};
 var layerControl = L.control.layers(baseLayers, otherLayers, {
@@ -68,5 +61,4 @@ var layerControl = L.control.layers(baseLayers, otherLayers, {
     position: 'topright'
 }).addTo(map);
 
-//map.setView([52.5, 7.29], 12);
 map.setView([47.315, 8.205], 9);
