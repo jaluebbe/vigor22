@@ -12,10 +12,10 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "../api/vector/metadata/{{region}}.json"
+      "url": "../api/vector/metadata/osm_offline.json"
     }
   },
-  "glyphs": "{{url_for('static', path='/fonts/{fontstack}/{range}.pbf')}}",
+  "glyphs": "../fonts/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",
