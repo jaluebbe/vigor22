@@ -11,3 +11,7 @@ uvicorn backend_fastapi:app --host 0.0.0.0 --port 80
 or to run four processes of the API:
 
 gunicorn -w4 -b 0.0.0.0:8000 backend_fastapi:app -k uvicorn.workers.UvicornWorker
+
+Install fonts required for vector tiles:
+
+git clone https://github.com/klokantech/klokantech-gl-fonts static/fonts

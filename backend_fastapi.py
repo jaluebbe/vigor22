@@ -1,9 +1,10 @@
 import tempfile
 import os
 import re
-from fastapi import FastAPI, Form, UploadFile, HTTPException
+from fastapi import FastAPI, Form, UploadFile, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import RedirectResponse, Response, JSONResponse
+from fastapi.templating import Jinja2Templates
 import uvicorn
 import geopandas
 import json
@@ -14,6 +15,8 @@ epsg_pattern = re.compile("^(?:EPSG|epsg):[0-9]{4,5}$")
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/", include_in_schema=False)
@@ -69,6 +72,76 @@ def get_mbtile_topplus_open(zoom_level: int, x: int, y: int):
     if result is None:
         raise HTTPException(status_code=404, detail="Tile not found.")
     return Response(content=result[0], media_type="image/png")
+
+
+@app.get("/api/vector/metadata/{region}.json")
+def get_vector_metadata(region: str, request: Request):
+    db_file_name = f"{region}.mbtiles"
+    if not os.path.isfile(db_file_name):
+        raise HTTPException(
+            status_code=404, detail=f"Region '{region}' not found."
+        )
+    db_connection = sqlite3.connect(f"file:{db_file_name}?mode=ro", uri=True)
+    cursor = db_connection.execute("SELECT * FROM metadata")
+    result = cursor.fetchall()
+    cursor.close()
+    db_connection.close()
+    if result is None:
+        raise HTTPException(status_code=404, detail="Metadata not found.")
+    metadata = {
+        "tilejson": "2.0.0",
+        "scheme": "xyz",
+        "tiles": [
+            f"{request.url.scheme}://{request.url.hostname}:{request.url.port}"
+            f"/api/vector/tiles/{region}/{{z}}/{{x}}/{{y}}.pbf"
+        ],
+    }
+    for key, value in result:
+        if key == "json":
+            metadata.update(json.loads(value))
+        elif key in ("minzoom", "maxzoom"):
+            metadata[key] = int(value)
+        elif key == "center":
+            continue
+        elif key == "bounds":
+            metadata[key] = [float(_value) for _value in value.split(",")]
+        else:
+            metadata[key] = value
+    return metadata
+
+
+@app.get("/api/vector/tiles/{region}/{zoom_level}/{x}/{y}.pbf")
+def get_vector_tiles(region: str, zoom_level: int, x: int, y: int):
+    tile_column = x
+    tile_row = y_tile2row(y, zoom_level)
+    db_file_name = f"{region}.mbtiles"
+    if not os.path.isfile(db_file_name):
+        raise HTTPException(
+            status_code=404, detail=f"Region '{region}' not found."
+        )
+    db_connection = sqlite3.connect(f"file:{db_file_name}?mode=ro", uri=True)
+    cursor = db_connection.execute(
+        "SELECT tile_data FROM tiles "
+        "WHERE zoom_level = ? and tile_column = ? and tile_row = ?",
+        (zoom_level, tile_column, tile_row),
+    )
+    result = cursor.fetchone()
+    cursor.close()
+    db_connection.close()
+    if result is None:
+        raise HTTPException(status_code=404, detail="Tile not found.")
+    return Response(
+        content=result[0],
+        media_type="application/octet-stream",
+        headers={"Content-Encoding": "gzip"},
+    )
+
+
+@app.get("/api/vector/style/{region}.json", response_class=JSONResponse)
+async def get_vector_style(request: Request, region: str):
+    return templates.TemplateResponse(
+        "basic.json", {"request": request, "region": region}
+    )
 
 
 if __name__ == "__main__":
