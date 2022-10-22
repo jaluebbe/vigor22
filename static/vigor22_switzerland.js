@@ -48,7 +48,7 @@ function addSwisstopoVectorLayer(layerName, layerLabel) {
     });
     return myLayer;
 };
-addSwisstopoBaseLayer("ch.swisstopo.pixelkarte-farbe", "Map of Switzerland").addTo(map);
+addSwisstopoBaseLayer("ch.swisstopo.pixelkarte-farbe", "Map of Switzerland");
 addSwisstopoBaseLayer("ch.swisstopo.pixelkarte-grau", "Map of Switzerland (grey)");
 
 addSwisstopoVectorLayer("ch.swisstopo.leichte-basiskarte.vt", "swisstopo light base map");
