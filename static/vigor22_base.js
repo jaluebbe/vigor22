@@ -46,6 +46,21 @@ map.on('baselayerchange', function(eo) {
         openStreetMapOffline._update();
     }
 });
+
+function addEsriBaseLayer(layerName, layerLabel) {
+    myLayer = L.esri.Vector.vectorBasemapLayer(layerName, {
+        apiKey: esriAccessToken
+    });
+    layerControl.addBaseLayer(myLayer, layerLabel);
+    // make sure to reprint the vector map after being selected.
+    map.on('baselayerchange', function(eo) {
+        if (eo.name === layerLabel) {
+            myLayer._maplibreGL._update();
+        }
+    });
+    return myLayer;
+}
+
 L.control.scale({
     'imperial': false
 }).addTo(map);
@@ -60,5 +75,7 @@ var layerControl = L.control.layers(baseLayers, otherLayers, {
     collapsed: L.Browser.mobile, // hide on mobile devices
     position: 'topright'
 }).addTo(map);
-
+if (typeof esriAccessToken !== 'undefined') {
+    addEsriBaseLayer("ArcGIS:Imagery", "Esri Imagery");
+}
 map.setView([47.315, 8.205], 9);
