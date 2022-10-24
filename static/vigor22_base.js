@@ -70,8 +70,7 @@ var baseLayers = {
     "TopPlusOpen (offline)": topPlusOpenOffline,
     "OpenStreetMap (offline)": openStreetMapOffline,
 };
-var otherLayers = {};
-var layerControl = L.control.layers(baseLayers, otherLayers, {
+var layerControl = L.control.layers(baseLayers, {}, {
     collapsed: L.Browser.mobile, // hide on mobile devices
     position: 'topright'
 }).addTo(map);
