@@ -1,24 +1,39 @@
 map.createPane('other');
 map.createPane('boundaries');
 map.createPane('plan');
-map.createPane('protocol');
 map.getPane('boundaries').style.zIndex = 390;
 map.getPane('plan').style.zIndex = 391;
-map.getPane('protocol').style.zIndex = 392;
 map.getPane('other').style.zIndex = 393;
 
 function formatTooltip(content) {
-    return "<pre>" + JSON.stringify(content, undefined, 2) + "</pre>";
+    str = '<div class="tooltip-grid-container">';
+    for (const key in content) {
+        str = str + "<div>" + key + ":</div><div>" + content[key] + "</div>";
+    }
+    str = str + "</div>";
+    return str;
+}
+
+L.Polyline.prototype.options.showMeasurements = true;
+L.Polygon.prototype.options.measurementOptions = {
+    ha: true
+};
+
+function getDateString() {
+    let date = new Date();
+    return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + "_" + date.getHours() + "-" + date.getMinutes();
 }
 
 function onEachFeature(feature, layer) {
-    layer.on('click', function(eo) {
-        clickedShape(eo);
-    });
     layer.bindTooltip(formatTooltip(feature.properties), {
         sticky: true,
         direction: "top",
         offset: [0, -5]
+    });
+    layer.on('click', function(eo) {
+        let activeLayer = layerSelectionMapping[importTypeSelect.value];
+        if (activeLayer.hasLayer(eo.target))
+            clickedShape(eo);
     });
 }
 
@@ -46,7 +61,7 @@ var boundariesLayer = L.geoJSON([], {
             fillColor: "#003399",
             fillOpacity: 0.1,
             weight: 1.5,
-            color: "grey"
+            color: "blue"
         });
     }
 }).addTo(map);
@@ -62,26 +77,12 @@ var planLayer = L.geoJSON([], {
         });
     }
 }).addTo(map);
-var protocolLayer = L.geoJSON([], {
-    onEachFeature: onEachFeature,
-    pane: 'protocol',
-    style: function(feature) {
-        return styleShape(feature, {
-            fillColor: "#00ee00",
-            fillOpacity: 0.1,
-            weight: 1.5,
-            color: "grey"
-        });
-    }
-}).addTo(map);
 var otherLayersLabel = "<span style='background-color:rgba(255, 0, 0, 0.2)'>other layers</span>";
 var boundariesLayerLabel = "<span style='background-color:rgba(0, 51, 153, 0.2)'>Boundaries</span>";
 var planLayerLabel = "<span style='background-color:rgba(255, 204, 0, 0.2)'>Plan</span>";
-var protocolLayerLabel = "<span style='background-color:rgba(0, 238, 0, 0.2)'>Protocol</span>";
 layerControl.addOverlay(otherLayers, otherLayersLabel);
 layerControl.addOverlay(boundariesLayer, boundariesLayerLabel);
 layerControl.addOverlay(planLayer, planLayerLabel);
-layerControl.addOverlay(protocolLayer, protocolLayerLabel);
 
 map.pm.addControls({
     position: 'topleft',
@@ -106,45 +107,133 @@ map.on('pm:create', function(e) {
 
 map.on('pm:cut', function(eo) {
     if (eo.layer.feature !== undefined) {
-        eo.layer.feature.properties = eo.originalLayer.feature.properties;
-        eo.layer.setTooltipContent(formatTooltip(eo.layer.feature.properties));
+        if (typeof eo.originalLayer.feature !== "undefined") {
+            eo.layer.feature.properties = eo.originalLayer.feature.properties;
+            eo.layer.setTooltipContent(formatTooltip(eo.layer.feature.properties));
+        }
     }
-})
+});
 
-function importShapes() {
-    var selectedLayer = layerSelectionMapping[importTypeSelect.value];
-    if (document.getElementById("checkReplaceShapes").checked) {
-        selectedLayer.clearLayers();
-    }
-    let fileInput = document.getElementById("fileInput");
-    for (var i = 0; i < fileInput.files.length; i++) {
-        var fr = new FileReader();
-        fr.onload = function(fileData) {
-            let geojsonInput = JSON.parse(fileData.target.result);
-            selectedLayer.addData(geojsonInput);
-            map.fitBounds(selectedLayer.getBounds());
-        };
-        fr.readAsText(fileInput.files[i])
-    }
+function importFileContent(fileContent, targetLayer, showMeasurements = false) {
+    let geojsonInput = JSON.parse(fileContent);
+    L.Polygon.prototype.options.showMeasurements = showMeasurements;
+    targetLayer.addData(geojsonInput);
+    map.fitBounds(targetLayer.getBounds());
+    refreshImportLayerSelection();
 };
 
-function exportShapes() {
-    let fileName = prompt('Choose file name', 'download.geojson');
+function exportFromLayer(sourceLayer, exportName) {
+    let fileName = prompt('Choose file name', exportName + '_' + getDateString() + '.json');
     if (fileName === null || fileName.length == 0) {
         return;
     }
-
-    if (document.getElementById("checkDrawnOnly").checked) {
-        var dataExport = JSON.stringify(layerSelectionMapping[importTypeSelect.value].toGeoJSON());
-    } else {
-        var dataExport = JSON.stringify(map.pm.getGeomanLayers(true).toGeoJSON());
-    }
-
-    var pom = document.createElement('a');
+    let dataExport = JSON.stringify(sourceLayer.toGeoJSON());
+    let pom = document.createElement('a');
     pom.setAttribute('href', 'data:application/geo+json;charset=utf-8,' + encodeURIComponent(dataExport));
     pom.setAttribute('download', fileName);
     if (document.createEvent) {
-        var event = document.createEvent('MouseEvents');
+        let event = document.createEvent('MouseEvents');
+        event.initEvent('click', true, true);
+        pom.dispatchEvent(event);
+    } else {
+        pom.click();
+    }
+};
+
+function importBoundaries() {
+    let fileInput = document.getElementById("fileInput");
+    let storedData = localStorage.getItem('vigor22:boundaries');
+    if (fileInput.files.length == 0 && storedData == null) {
+        return;
+    }
+    boundariesLayer.clearLayers();
+    for (var i = 0; i < fileInput.files.length; i++) {
+        var fr = new FileReader();
+        fr.onload = function(fileData) {
+            importFileContent(fileData.target.result, boundariesLayer, true);
+        };
+        fr.readAsText(fileInput.files[i])
+    }
+    if (fileInput.files.length == 0) {
+        importFileContent(storedData, boundariesLayer, true);
+    }
+    fileInput.value = "";
+    localStorage.removeItem('vigor22:boundaries');
+};
+
+function exportBoundaries() {
+    exportFromLayer(boundariesLayer, "boundaries");
+};
+
+function importPlan() {
+    let fileInput = document.getElementById("fileInput");
+    let storedData = localStorage.getItem('vigor22:plan');
+    if (fileInput.files.length == 0 && storedData == null) {
+        return;
+    }
+    planLayer.clearLayers();
+    for (var i = 0; i < fileInput.files.length; i++) {
+        var fr = new FileReader();
+        fr.onload = function(fileData) {
+            importFileContent(fileData.target.result, planLayer);
+        };
+        fr.readAsText(fileInput.files[i])
+    }
+    if (fileInput.files.length == 0) {
+        importFileContent(storedData, planLayer);
+    }
+    fileInput.value = "";
+    localStorage.removeItem('vigor22:plan');
+};
+
+function exportPlan() {
+    exportFromLayer(planLayer, "plan");
+};
+
+function importProject() {
+    let fileInput = document.getElementById("fileInput");
+    if (fileInput.files.length == 0) {
+        return;
+    }
+    boundariesLayer.clearLayers();
+    planLayer.clearLayers();
+    otherLayers.clearLayers();
+    for (var i = 0; i < fileInput.files.length; i++) {
+        var fr = new FileReader();
+        fr.onload = function(fileData) {
+            let projectInput = JSON.parse(fileData.target.result);
+            L.Polygon.prototype.options.showMeasurements = true;
+            boundariesLayer.addData(projectInput.boundaries);
+            L.Polygon.prototype.options.showMeasurements = false;
+            planLayer.addData(projectInput.plan);
+            otherLayers.addData(projectInput.other);
+            if (boundariesLayer.getBounds().isValid())
+                map.fitBounds(boundariesLayer.getBounds());
+            else if (planLayer.getBounds().isValid())
+                map.fitBounds(planLayer.getBounds());
+            refreshImportLayerSelection();
+        };
+        fr.readAsText(fileInput.files[i])
+    }
+    fileInput.value = "";
+};
+
+function exportProject() {
+    exportName = "project";
+    let fileName = prompt('Choose file name', exportName + '_' + getDateString() + '.json');
+    if (fileName === null || fileName.length == 0) {
+        return;
+    }
+    let dataExport = JSON.stringify({
+        boundaries: boundariesLayer.toGeoJSON(),
+        plan: planLayer.toGeoJSON(),
+        other: otherLayers.toGeoJSON()
+    });
+    let pom = document.createElement('a');
+    pom.setAttribute('href', 'data:application/geo+json;charset=utf-8,' + encodeURIComponent(dataExport));
+    pom.setAttribute('download', fileName);
+    if (document.createEvent) {
+        let event = document.createEvent('MouseEvents');
         event.initEvent('click', true, true);
         pom.dispatchEvent(event);
     } else {
@@ -157,39 +246,40 @@ var legend = L.control({
 });
 legend.onAdd = function(map) {
     this._div = L.DomUtil.create('div', 'info legend');
-    this._div.innerHTML =
-        '<h4>Data transfer and drawing</h4><table>' +
-        '<tr><td><select id="importTypeSelect">' +
-        '<option selected value="other">other</option>' +
-        '<option value="boundaries">boundaries</option>' +
-        '<option value="plan">plan</option>' +
-        '<option value="protocol">protocol</option>' +
-        '</select></td><td>layer type</td></tr>' +
-        '<tr><td colspan="2"><input style="font-size: 9px;" type="file" id="fileInput" ' +
-        'accept=".geojson,application/json,application/geo+json" multiple></td></tr>' +
-        '<tr><td><button onclick="importShapes();">import</button></td><td>' +
-        '<input type="checkbox" id="checkReplaceShapes">&nbsp;and replace</td></tr>' +
-        '<tr><td><button onclick="exportShapes();">export</button></td>' +
-        '<td><input type="checkbox" id="checkDrawnOnly">&nbsp;selected only</td></tr>'
-    '</table>';
+    let tempSource = document.getElementById('dataTransferInputTemplate');
+    this._div.appendChild(tempSource.content.cloneNode(true));
     L.DomEvent.disableClickPropagation(this._div);
     return this._div;
-};
-
+}
 legend.addTo(map);
+
+var drawingLegend = L.control({
+    position: 'topleft'
+});
+drawingLegend.onAdd = function(map) {
+    this._div = L.DomUtil.create('div', 'info legend');
+    let tempSource = document.getElementById('drawingInputTemplate');
+    this._div.appendChild(tempSource.content.cloneNode(true));
+    L.DomEvent.disableClickPropagation(this._div);
+    return this._div;
+}
+drawingLegend.addTo(map);
+
 const importTypeSelect = document.getElementById("importTypeSelect");
 const layerSelectionMapping = {
     "other": otherLayers,
     "boundaries": boundariesLayer,
     "plan": planLayer,
-    "protocol": protocolLayer
 };
 
 function refreshImportLayerSelection() {
-    map.pm.disableGlobalEditMode();
-    map.pm.disableGlobalRotateMode();
-    map.pm.disableGlobalRemovalMode();
-    var activeLayer = layerSelectionMapping[importTypeSelect.value];
+    map.pm.disableGlobalCutMode();
+    let activeLayer = layerSelectionMapping[importTypeSelect.value];
+    if (importTypeSelect.value == 'boundaries') {
+        L.Polygon.prototype.options.showMeasurements = true;
+    } else {
+        L.Polygon.prototype.options.showMeasurements = false;
+    }
     Object.values(layerSelectionMapping).forEach(layer => {
         if (layer == activeLayer) {
             layer.pm.setOptions({
@@ -211,5 +301,4 @@ function refreshImportLayerSelection() {
         layerGroup: activeLayer,
     });
 }
-importTypeSelect.onchange = refreshImportLayerSelection;
 refreshImportLayerSelection();
