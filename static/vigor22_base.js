@@ -17,6 +17,26 @@ function addPrivacyStatement() {
 }
 addPrivacyStatement();
 
+function storeMapView() {
+    let mapCenter = map.getCenter();
+    let mapZoom = map.getZoom();
+    sessionStorage.setItem('vigor22:mapView', JSON.stringify({
+        lat: mapCenter.lat,
+        lon: mapCenter.lng,
+        zoom: mapZoom
+    }))
+}
+
+function restoreMapView() {
+    let mapViewData = sessionStorage.getItem('vigor22:mapView');
+    if (mapViewData == null) {
+        map.setView([47.315, 8.205], 9);
+    } else {
+        let mapView = JSON.parse(mapViewData);
+        map.setView([mapView.lat, mapView.lon], mapView.zoom);
+    }
+}
+
 var wmsTopPlusOpen = L.tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus_open', {
     layers: 'web_scale',
     maxZoom: 19,
@@ -77,4 +97,4 @@ var layerControl = L.control.layers(baseLayers, {}, {
 if (typeof esriAccessToken !== 'undefined') {
     addEsriBaseLayer("ArcGIS:Imagery", "Esri Imagery");
 }
-map.setView([47.315, 8.205], 9);
+restoreMapView();
