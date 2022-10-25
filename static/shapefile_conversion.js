@@ -106,12 +106,12 @@ function exportShapes() {
 
 function saveAsBoundaries() {
     let saveData = JSON.stringify(importLayers.toGeoJSON());
-    localStorage.setItem('vigor22:boundaries', saveData);
+    sessionStorage.setItem('vigor22:boundaries', saveData);
 }
 
 function saveAsPlan() {
     let saveData = JSON.stringify(importLayers.toGeoJSON());
-    localStorage.setItem('vigor22:plan', saveData);
+    sessionStorage.setItem('vigor22:plan', saveData);
 }
 
 shapeInputForm.fileInput.onchange = () => {

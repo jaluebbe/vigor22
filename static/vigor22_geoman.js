@@ -142,7 +142,7 @@ function exportFromLayer(sourceLayer, exportName) {
 
 function importBoundaries() {
     let fileInput = document.getElementById("fileInput");
-    let storedData = localStorage.getItem('vigor22:boundaries');
+    let storedData = sessionStorage.getItem('vigor22:boundaries');
     if (fileInput.files.length == 0 && storedData == null) {
         return;
     }
@@ -158,7 +158,6 @@ function importBoundaries() {
         importFileContent(storedData, boundariesLayer, true);
     }
     fileInput.value = "";
-    localStorage.removeItem('vigor22:boundaries');
 };
 
 function exportBoundaries() {
@@ -167,7 +166,7 @@ function exportBoundaries() {
 
 function importPlan() {
     let fileInput = document.getElementById("fileInput");
-    let storedData = localStorage.getItem('vigor22:plan');
+    let storedData = sessionStorage.getItem('vigor22:plan');
     if (fileInput.files.length == 0 && storedData == null) {
         return;
     }
@@ -183,7 +182,6 @@ function importPlan() {
         importFileContent(storedData, planLayer);
     }
     fileInput.value = "";
-    localStorage.removeItem('vigor22:plan');
 };
 
 function exportPlan() {
@@ -229,6 +227,7 @@ function exportProject() {
         plan: planLayer.toGeoJSON(),
         other: otherLayers.toGeoJSON()
     });
+    sessionStorage.setItem('vigor22:project', dataExport);
     let pom = document.createElement('a');
     pom.setAttribute('href', 'data:application/geo+json;charset=utf-8,' + encodeURIComponent(dataExport));
     pom.setAttribute('download', fileName);
