@@ -65,14 +65,22 @@ function importShapes() {
     formData.append('input_crs', shapeInputForm.inputCrs.value);
     const xhr = new XMLHttpRequest();
     xhr.onload = () => {
-        shapeInputForm.exportButton.disabled = false;
-        shapeInputForm.saveAsBoundariesButton.disabled = false;
-        shapeInputForm.saveAsPlanButton.disabled = false;
         importLayers.clearLayers();
+        if (xhr.status != 200) {
+            if (xhr.responseText == 'Internal Server Error') {
+                alert(xhr.responseText);
+            } else {
+                alert(JSON.parse(xhr.responseText).detail);
+            }
+            return;
+        }
         jsonResponse = JSON.parse(xhr.responseText);
         exportName = jsonResponse.file_name;
         importLayers.addData(jsonResponse.geojson);
         map.fitBounds(importLayers.getBounds());
+        shapeInputForm.exportButton.disabled = false;
+        shapeInputForm.saveAsBoundariesButton.disabled = false;
+        shapeInputForm.saveAsPlanButton.disabled = false;
     }
     xhr.open('POST', '/api/convert_shape_files/');
     xhr.send(formData);
