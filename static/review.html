@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>Vigor 22 review</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="leaflet/leaflet.css">
+    <link rel="stylesheet" href="maplibre-gl/maplibre-gl.css">
+    <link rel="stylesheet" href="vigor22.css">
+    <style>
+        .tooltip-grid-container {
+            display: grid;
+            grid-template-columns: auto auto;
+            column-gap: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <template id="dataTransferInputTemplate">
+        <form name="dataTransferInputForm" onsubmit="return false;">
+            <div class="grid-container">
+                <h4>Data Transfer</h4>
+                <input style="font-size: 10px;" type="file" id="fileInput" accept="application/json">
+                <button onclick="importProject();" id="importProjectButton" name="importProjectButton">Import project</button>
+            </div>
+        </form>
+    </template>
+    <div class="navbar" id="myNavbar">
+        <a href="./shapefile_conversion.html">Shapefile conversion</a>
+        <a href="./editor_geoman.html"><img height="12" src="flag_of_germany.svg" alt="DE"> Editor</a>
+        <a href="./editor_geoman_switzerland.html"><img height="12" src="flag_of_switzerland.svg" alt="CH"> Editor</a>
+        <a href="./gps_map.html">GPS map</a>
+        <a href="./review.html" class="active">Review</a>
+        <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="myFunction()">&#9776;</a>
+    </div>
+    <script>
+        function myFunction() {
+            var x = document.getElementById("myNavbar");
+            if (x.className === "navbar") {
+                x.className += " responsive";
+            } else {
+                x.className = "navbar";
+            }
+        }
+    </script>
+    <script src="leaflet/leaflet.js"></script>
+    <script src="maplibre-gl/maplibre-gl.js"></script>
+    <script src="maplibre-gl/leaflet-maplibre-gl.js"></script>
+    <script src="leaflet/esri-leaflet.js"></script>
+    <script src="leaflet/esri-leaflet-vector.js"></script>
+    <script src="vigor22_base.js"></script>
+    <script src="vigor22_review.js"></script>
+</body>
+
+</html>
