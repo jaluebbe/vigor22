@@ -342,10 +342,10 @@ function onLocationFound(e) {
                 frontPoint.geometry.coordinates.slice().reverse()
             ],
             [centerPoint.geometry.coordinates.slice().reverse(),
-                leftPoint.geometry.coordinates.slice().reverse()
+                outerLeftPoint.geometry.coordinates.slice().reverse()
             ],
             [centerPoint.geometry.coordinates.slice().reverse(),
-                rightPoint.geometry.coordinates.slice().reverse()
+                outerRightPoint.geometry.coordinates.slice().reverse()
             ]
         ]);
         let firstLeftQuartileInBounds = false;
