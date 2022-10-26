@@ -229,7 +229,7 @@ function exportProject() {
     });
     sessionStorage.setItem('vigor22:project', dataExport);
     let pom = document.createElement('a');
-    pom.setAttribute('href', 'data:application/geo+json;charset=utf-8,' + encodeURIComponent(dataExport));
+    pom.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(dataExport));
     pom.setAttribute('download', fileName);
     if (document.createEvent) {
         let event = document.createEvent('MouseEvents');
