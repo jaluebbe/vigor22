@@ -197,44 +197,37 @@ leftInfo.showText = function(infoText) {
 };
 leftInfo.addTo(map);
 var myMarker = L.marker([], {
-    zIndexOffset: 1000,
-    pmIgnore: true
+    zIndexOffset: 1000
 });
 myMarker.bindTooltip("", {
     direction: 'top'
 });
 var myCircle = L.circle([], {
-    radius: 0,
-    pmIgnore: true
+    radius: 0
 });
 var myPolyline = L.polyline([], {
     pane: 'vehicle',
-    color: 'red',
-    pmIgnore: true
+    color: 'red'
 });
 var innerLeftPolygon = L.polygon([], {
     pane: 'active',
     color: 'green',
-    fillOpacity: 0.3,
-    pmIgnore: true
+    fillOpacity: 0.3
 });
 var innerRightPolygon = L.polygon([], {
     pane: 'active',
     color: 'green',
-    fillOpacity: 0.3,
-    pmIgnore: true
+    fillOpacity: 0.3
 });
 var outerLeftPolygon = L.polygon([], {
     pane: 'active',
     color: 'green',
-    fillOpacity: 0.1,
-    pmIgnore: true
+    fillOpacity: 0.1
 });
 var outerRightPolygon = L.polygon([], {
     pane: 'active',
     color: 'green',
-    fillOpacity: 0.1,
-    pmIgnore: true
+    fillOpacity: 0.1
 });
 
 var leftRate = 0;
