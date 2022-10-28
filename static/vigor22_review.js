@@ -138,3 +138,4 @@ legend.onAdd = function(map) {
     return this._div;
 }
 legend.addTo(map);
+restoreMapView();

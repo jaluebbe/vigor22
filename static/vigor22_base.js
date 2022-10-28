@@ -97,4 +97,3 @@ var layerControl = L.control.layers(baseLayers, {}, {
 if (typeof esriAccessToken !== 'undefined') {
     addEsriBaseLayer("ArcGIS:Imagery", "Esri Imagery");
 }
-restoreMapView();

@@ -372,6 +372,11 @@ function onLocationFound(e) {
         let rightInBounds = outerRightInBounds && innerRightInBounds && firstRightQuartileInBounds && thirdRightQuartileInBounds;
         let newLeftRate = 0;
         let newRightRate = 0;
+        let planMissing = planLayer.getLayers().length == 0;
+        if (leftInBounds && planMissing)
+            newLeftRate = 1;
+        if (rightInBounds && planMissing)
+            newRightRate = 1;
         turf.featureEach(planLayer.toGeoJSON(), function(feature, featureIndex) {
             if (leftInBounds && turf.booleanPointInPolygon(innerLeftPoint, feature)) {
                 if (typeof feature.properties.rate_ha !== "undefined") {
@@ -434,3 +439,4 @@ map.locate({
     watch: true,
     enableHighAccuracy: true
 });
+map.setZoom(16);

@@ -301,3 +301,4 @@ function refreshImportLayerSelection() {
     });
 }
 refreshImportLayerSelection();
+restoreMapView();

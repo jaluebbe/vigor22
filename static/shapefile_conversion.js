@@ -117,3 +117,4 @@ function saveAsPlan() {
 shapeInputForm.fileInput.onchange = () => {
     importShapes();
 }
+restoreMapView();
