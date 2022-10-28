@@ -439,4 +439,4 @@ map.locate({
     watch: true,
     enableHighAccuracy: true
 });
-map.setZoom(16);
+map.setView([47.32, 8.2], 16);
