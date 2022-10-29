@@ -109,7 +109,7 @@ function importProjectFileContent(fileContent) {
 };
 
 function importProject() {
-    let fileInput = document.getElementById("fileInput");
+    let fileInput = dataTransferInputForm.fileInput;
     let storedData = sessionStorage.getItem('vigor22:project');
     if (fileInput.files.length == 0 && storedData == null) {
         return;
@@ -430,6 +430,9 @@ function onLocationFound(e) {
     }
 }
 
+dataTransferInputForm.fileInput.onchange = () => {
+    importProject();
+}
 function onLocationError(e) {
     info.showText('No geolocation information available.');
 }
