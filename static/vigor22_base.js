@@ -69,7 +69,8 @@ map.on('baselayerchange', function(eo) {
 
 function addEsriBaseLayer(layerName, layerLabel) {
     myLayer = L.esri.Vector.vectorBasemapLayer(layerName, {
-        apiKey: esriAccessToken
+        apiKey: esriAccessToken,
+        pane: 'tilePane'
     });
     layerControl.addBaseLayer(myLayer, layerLabel);
     // make sure to reprint the vector map after being selected.
