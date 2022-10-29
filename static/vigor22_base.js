@@ -37,7 +37,7 @@ function restoreMapView() {
         setDefaultPosition();
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
-                map.setView([position.coords.latitude, position.coords.longitude], 16);
+                map.setView([position.coords.latitude, position.coords.longitude], 12);
             });
         }
     } else {
