@@ -27,10 +27,19 @@ function storeMapView() {
     }))
 }
 
+function setDefaultPosition() {
+    map.setView([47.315, 8.205], 9);
+}
+
 function restoreMapView() {
     let mapViewData = sessionStorage.getItem('vigor22:mapView');
     if (mapViewData == null) {
-        map.setView([47.315, 8.205], 9);
+        setDefaultPosition();
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                map.setView([position.coords.latitude, position.coords.longitude], 16);
+            });
+        }
     } else {
         let mapView = JSON.parse(mapViewData);
         map.setView([mapView.lat, mapView.lon], mapView.zoom);
