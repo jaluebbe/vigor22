@@ -107,11 +107,13 @@ function exportShapes() {
 function saveAsBoundaries() {
     let saveData = JSON.stringify(importLayers.toGeoJSON());
     sessionStorage.setItem('vigor22:boundaries', saveData);
+    shapeInputForm.saveAsBoundariesButton.style.backgroundColor = '#00339933';
 }
 
 function saveAsPlan() {
     let saveData = JSON.stringify(importLayers.toGeoJSON());
     sessionStorage.setItem('vigor22:plan', saveData);
+    shapeInputForm.saveAsPlanButton.style.backgroundColor = '#ffcc0033';
 }
 
 shapeInputForm.fileInput.onchange = () => {
