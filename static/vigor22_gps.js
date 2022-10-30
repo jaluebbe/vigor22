@@ -322,10 +322,13 @@ function onLocationFound(e) {
         info.showText('Speed and heading unavailable.');
         myPolyline.setLatLngs([]);
     } else if (e.speed < 1) {
-        info.showText('' + Math.round(e.speed * 100) / 100 + '&nbsp;m/s is too slow.');
         myPolyline.setLatLngs([]);
         closeLeftShapes();
         closeRightShapes();
+        leftRate = 0;
+        rightRate = 0;
+        info.showText('' + Math.round(e.speed * 100) / 100 + '&nbsp;m/s is too slow.<br>0%');
+        leftInfo.showText('0%');
     } else {
         myMarker._tooltip.setContent('' + Math.round(e.speed * 100) / 100 + '&nbsp;m/s');
         let frontPoint = turf.destination(centerPoint, 5e-3, e.heading);
