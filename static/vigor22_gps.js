@@ -445,4 +445,11 @@ map.locate({
     watch: true,
     enableHighAccuracy: true
 });
+function resetGPSConnection() {
+    map.stopLocate();
+    map.locate({
+        watch: true,
+        enableHighAccuracy: true
+    });
+};
 map.setView([47.32, 8.2], 16);
