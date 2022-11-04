@@ -65,17 +65,20 @@ var topPlusOpenOffline = L.tileLayer('/api/mbtiles/topplus_open/{z}/{x}/{y}.png'
     attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2022, ' +
         '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
 });
-var openStreetMapOffline = L.maplibreGL({
-    style: 'osm_basic_style.json',
-    attribution: '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-});
-// make sure to reprint the vector map after being selected.
-map.on('baselayerchange', function(eo) {
-    if (eo.name === 'OpenStreetMap (offline)') {
-        openStreetMapOffline._update();
-    }
-});
-
+function addOSMVectorLayer(styleName, layerLabel) {
+    let myLayer = L.maplibreGL({
+        style: '../api/vector/style/' + styleName + '.json',
+        attribution: '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    });
+    layerControl.addBaseLayer(myLayer, layerLabel);
+    // make sure to reprint the vector map after being selected.
+    map.on('baselayerchange', function(eo) {
+        if (eo.name === layerLabel) {
+            myLayer._update();
+        }
+    });
+    return myLayer;
+};
 function addEsriBaseLayer(layerName, layerLabel) {
     myLayer = L.esri.Vector.vectorBasemapLayer(layerName, {
         apiKey: esriAccessToken,
@@ -98,7 +101,6 @@ var baseLayers = {
     "TopPlusOpen": wmsTopPlusOpen,
     "<span style='color: gray'>TopPlusOpen (grey)</span>": wmsTopPlusOpenGrey,
     "TopPlusOpen (offline)": topPlusOpenOffline,
-    "OpenStreetMap (offline)": openStreetMapOffline,
 };
 var layerControl = L.control.layers(baseLayers, {}, {
     collapsed: L.Browser.mobile, // hide on mobile devices
@@ -107,3 +109,5 @@ var layerControl = L.control.layers(baseLayers, {}, {
 if (typeof esriAccessToken !== 'undefined') {
     addEsriBaseLayer("ArcGIS:Imagery", "Esri Imagery");
 }
+addOSMVectorLayer("osm_basic", "OSM Basic (offline)");
+addOSMVectorLayer("osm_bright", "OSM Bright (offline)");

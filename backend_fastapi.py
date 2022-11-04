@@ -131,6 +131,38 @@ def get_vector_metadata(region: str, request: Request):
     return metadata
 
 
+@app.get("/api/vector/style/{style_name}.json")
+def get_vector_style(style_name: str, request: Request):
+    style_file_name = f"{style_name}_style.json"
+    if not os.path.isfile(style_file_name):
+        raise HTTPException(
+            status_code=404, detail=f"Style '{style_name}' not known."
+        )
+    with open(style_file_name) as f:
+        style = json.load(f)
+    if request.url.port is None:
+        # workaround for operation behind reverse proxy
+        port_suffix = ""
+        scheme = "https"
+    else:
+        port_suffix = f":{request.url.port}"
+        scheme = request.url.scheme
+    style["sources"]["openmaptiles"]["url"] = (
+        f"{scheme}://{request.url.hostname}{port_suffix}"
+        "/api/vector/metadata/osm_offline.json"
+    )
+    style["glyphs"] = (
+        f"{scheme}://{request.url.hostname}{port_suffix}"
+        "/fonts/{fontstack}/{range}.pbf"
+    )
+    if style.get("sprite") is not None:
+        style["sprite"] = (
+            f"{scheme}://{request.url.hostname}{port_suffix}"
+            f"/static/{style_name}/sprite"
+        )
+    return style
+
+
 @app.get("/api/vector/tiles/{region}/{zoom_level}/{x}/{y}.pbf")
 def get_vector_tiles(region: str, zoom_level: int, x: int, y: int):
     tile_column = x
