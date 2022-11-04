@@ -15,6 +15,7 @@ RUN apt-get update && \
 
 COPY ./static /code/static
 COPY ./mbtiles.py /code/
+COPY ./*_style.json /code/
 COPY ./backend_fastapi.py /code/
 
 EXPOSE 80
