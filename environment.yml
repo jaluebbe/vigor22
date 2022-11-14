@@ -1,12 +1,10 @@
 name: vigor22
 dependencies:
-  - python=3
-  - gunicorn
-  - geopandas
+  - python>=3.7
+  - geopandas=0.12.1
   - pip
   - pip:
     - fastapi
     - uvicorn
-    - aiofiles
     - python-multipart
     - owslib
