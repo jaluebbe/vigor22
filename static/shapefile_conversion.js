@@ -81,6 +81,7 @@ function importShapes() {
         shapeInputForm.exportButton.disabled = false;
         shapeInputForm.saveAsBoundariesButton.disabled = false;
         shapeInputForm.saveAsPlanButton.disabled = false;
+        shapeInputForm.fileInput.value = "";
     }
     xhr.open('POST', '/api/convert_shape_files/');
     xhr.send(formData);
@@ -104,16 +105,25 @@ function exportShapes() {
     }
 }
 
+function resetImportLayers() {
+    shapeInputForm.exportButton.disabled = true;
+    shapeInputForm.saveAsBoundariesButton.disabled = true;
+    shapeInputForm.saveAsPlanButton.disabled = true;
+    importLayers.clearLayers();
+}
+
 function saveAsBoundaries() {
     let saveData = JSON.stringify(importLayers.toGeoJSON());
     sessionStorage.setItem('vigor22:boundaries', saveData);
-    shapeInputForm.saveAsBoundariesButton.style.backgroundColor = '#00339933';
+    shapeInputForm.saveAsBoundariesButton.style.backgroundColor = '#00339944';
+    resetImportLayers();
 }
 
 function saveAsPlan() {
     let saveData = JSON.stringify(importLayers.toGeoJSON());
     sessionStorage.setItem('vigor22:plan', saveData);
-    shapeInputForm.saveAsPlanButton.style.backgroundColor = '#ffcc0033';
+    shapeInputForm.saveAsPlanButton.style.backgroundColor = '#ffcc0044';
+    resetImportLayers();
 }
 
 shapeInputForm.fileInput.onchange = () => {
