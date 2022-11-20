@@ -15,7 +15,7 @@
     <style>
         .two-columns {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: auto auto;
             column-gap: 5px;
             row-gap: 5px;
         }
@@ -71,6 +71,17 @@
                     <option selected value="boundaries">boundaries</option>
                     <option value="plan">plan</option>
                 </select>
+                <h4>Project settings</h4>
+                <div class="two-columns">
+                    <div>Key</div><select id="rateNameSelect" name="rateNameSelect" onchange="updateRateDropdown();">
+                    </select>
+                    <div>Max.:</div>
+                    <div><output name="rateMaximum" for="rateNameSelect"></output></div>
+                    <div>Range</div>
+                    <div><input type="number" name="throwingRangeInput" id="throwingRangeInput" min="5" max="50" step="0.5" value="15"></input>&nbsp;m</div>
+                    <div>Speed</div>
+                    <div><input type="number" name="minSpeedInput" id="minSpeedInput" min="1" max="10" step="0.1" value="1"></input>&nbsp;m/s</div>
+                </div>
             </div>
         </form>
     </template>
