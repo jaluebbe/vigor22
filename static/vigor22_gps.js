@@ -93,6 +93,7 @@ layerControl.addOverlay(otherLayers, otherLayersLabel);
 layerControl.addOverlay(boundariesLayer, boundariesLayerLabel);
 layerControl.addOverlay(planLayer, planLayerLabel);
 layerControl.addOverlay(protocolLayer, protocolLayerLabel);
+var settings = {};
 
 function importProjectFileContent(fileContent) {
     let projectInput = JSON.parse(fileContent);
@@ -101,6 +102,7 @@ function importProjectFileContent(fileContent) {
     if (projectInput.protocol != null) {
         protocolLayer.addData(projectInput.protocol);
     }
+    Object.assign(settings, projectInput.settings);
     otherLayers.addData(projectInput.other);
     if (boundariesLayer.getBounds().isValid())
         map.fitBounds(boundariesLayer.getBounds());
@@ -118,6 +120,9 @@ function importProject() {
     planLayer.clearLayers();
     otherLayers.clearLayers();
     protocolLayer.clearLayers();
+    for (const key in settings) {
+        delete settings[key];
+    }
     for (var i = 0; i < fileInput.files.length; i++) {
         var fr = new FileReader();
         fr.onload = function(fileData) {
@@ -141,7 +146,8 @@ function exportProject() {
         boundaries: boundariesLayer.toGeoJSON(),
         plan: planLayer.toGeoJSON(),
         protocol: protocolLayer.toGeoJSON(),
-        other: otherLayers.toGeoJSON()
+        other: otherLayers.toGeoJSON(),
+        settings: settings
     });
     sessionStorage.setItem('vigor22:project', dataExport);
     let pom = document.createElement('a');
@@ -321,7 +327,7 @@ function onLocationFound(e) {
     if (typeof e.heading === "undefined") {
         info.showText('Speed and heading unavailable.');
         myPolyline.setLatLngs([]);
-    } else if (e.speed < 1) {
+    } else if (e.speed < settings.min_speed) {
         myPolyline.setLatLngs([]);
         closeLeftShapes();
         closeRightShapes();
@@ -332,14 +338,14 @@ function onLocationFound(e) {
     } else {
         myMarker._tooltip.setContent('' + Math.round(e.speed * 100) / 100 + '&nbsp;m/s');
         let frontPoint = turf.destination(centerPoint, 5e-3, e.heading);
-        let firstLeftQuartilePoint = turf.destination(centerPoint, 3.75e-3, e.heading - 90);
-        let firstRightQuartilePoint = turf.destination(centerPoint, 3.75e-3, e.heading + 90);
-        let thirdLeftQuartilePoint = turf.destination(centerPoint, 11.25e-3, e.heading - 90);
-        let thirdRightQuartilePoint = turf.destination(centerPoint, 11.25e-3, e.heading + 90);
-        let innerLeftPoint = turf.destination(centerPoint, 7.5e-3, e.heading - 90);
-        let innerRightPoint = turf.destination(centerPoint, 7.5e-3, e.heading + 90);
-        let outerLeftPoint = turf.destination(centerPoint, 15e-3, e.heading - 90);
-        let outerRightPoint = turf.destination(centerPoint, 15e-3, e.heading + 90);
+        let firstLeftQuartilePoint = turf.destination(centerPoint, settings.throwing_range * 0.25e-3, e.heading - 90);
+        let firstRightQuartilePoint = turf.destination(centerPoint, settings.throwing_range * 0.25e-3, e.heading + 90);
+        let thirdLeftQuartilePoint = turf.destination(centerPoint, settings.throwing_range * 0.75e-3, e.heading - 90);
+        let thirdRightQuartilePoint = turf.destination(centerPoint, settings.throwing_range * 0.75e-3, e.heading + 90);
+        let innerLeftPoint = turf.destination(centerPoint, settings.throwing_range * 0.5e-3, e.heading - 90);
+        let innerRightPoint = turf.destination(centerPoint, settings.throwing_range * 0.5e-3, e.heading + 90);
+        let outerLeftPoint = turf.destination(centerPoint, settings.throwing_range * 1e-3, e.heading - 90);
+        let outerRightPoint = turf.destination(centerPoint, settings.throwing_range * 1e-3, e.heading + 90);
         myPolyline.setLatLngs([
             [centerPoint.geometry.coordinates.slice().reverse(),
                 frontPoint.geometry.coordinates.slice().reverse()
@@ -382,15 +388,15 @@ function onLocationFound(e) {
             newRightRate = 1;
         turf.featureEach(planLayer.toGeoJSON(), function(feature, featureIndex) {
             if (leftInBounds && turf.booleanPointInPolygon(innerLeftPoint, feature)) {
-                if (typeof feature.properties.rate_ha !== "undefined") {
-                    newLeftRate = feature.properties.rate_ha;
+                if (typeof feature.properties[settings.rate_key] !== "undefined") {
+                    newLeftRate = feature.properties[settings.rate_key] / settings.rate_maximum;
                 } else if (typeof feature.properties.RATE !== "undefined") {
                     newLeftRate = feature.properties.RATE / 100;
                 }
             }
             if (rightInBounds && turf.booleanPointInPolygon(innerRightPoint, feature)) {
-                if (typeof feature.properties.rate_ha !== "undefined") {
-                    newRightRate = feature.properties.rate_ha;
+                if (typeof feature.properties[settings.rate_key] !== "undefined") {
+                    newRightRate = feature[settings.rate_key] / settings.rate_maximum;
                 } else if (typeof feature.properties.RATE !== "undefined") {
                     newRightRate = feature.properties.RATE / 100;
                 }
@@ -436,20 +442,8 @@ function onLocationFound(e) {
 dataTransferInputForm.fileInput.onchange = () => {
     importProject();
 }
+
 function onLocationError(e) {
     info.showText('No geolocation information available.');
 }
-map.on('locationfound', onLocationFound);
-map.on('locationerror', onLocationError);
-map.locate({
-    watch: true,
-    enableHighAccuracy: true
-});
-function resetGPSConnection() {
-    map.stopLocate();
-    map.locate({
-        watch: true,
-        enableHighAccuracy: true
-    });
-};
 map.setView([47.32, 8.2], 16);

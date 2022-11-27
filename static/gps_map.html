@@ -56,6 +56,21 @@
             </div>
         </form>
     </template>
+    <template id="leftRateMonitorTemplate">
+        <form name="leftRateMonitorForm" onsubmit="return false;">
+            <div class="grid-container">
+                <h4>Data Transfer</h4>
+                <input type="file" id="fileInput" accept="application/json">
+                <div class="two-columns">
+                    <div style="margin: auto;">Project</div>
+                    <button onclick="importProject();" id="importProjectButton" name="importProjectButton">import</button>
+                    <button onclick="exportProject();" id="exportProjectButton" name="exportProjectButton">export</button>
+                </div>
+                <h4>GPS</h4>
+                <button onclick="resetGPSConnection()">reset connection</button>
+            </div>
+        </form>
+    </template>
     <div class="navbar" id="myNavbar">
         <a href="./shapefile_conversion.html">Shapefile conversion</a>
         <a href="./editor_geoman.html"><img height="12" src="flag_of_germany.svg" alt="DE"> Editor</a>
@@ -83,6 +98,7 @@
     <script src="esri_access_token.js"></script>
     <script src="vigor22_base.js"></script>
     <script src="vigor22_gps.js"></script>
+    <script src="gps_device.js"></script>
 </body>
 
 </html>
