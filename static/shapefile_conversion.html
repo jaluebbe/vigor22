@@ -15,6 +15,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             column-gap: 5px;
+            row-gap: 5px;
         }
 
         .tooltip-grid-container {
@@ -46,7 +47,16 @@
                         <option value="EPSG:27700">OSGB36</option>
                     </select>&nbsp;<label for="inputCrs">Geodetic CRS</label></div>
                 <button onclick="exportShapes();" id="exportButton" name="exportButton" disabled>Export GeoJSON</button>
-                <div class="two-columns"><button onclick="saveAsBoundaries();" id="saveAsBoundariesButton" name="saveAsBoundariesButton" disabled>Save boundaries</button>
+                <div class="two-columns">
+                    <div></div><select id="rateNameSelect" name="rateNameSelect" onchange="updateRateDropdown();">
+                    </select>
+                    <div></div>
+                    <div>
+                        <label for="rateMaximum">Max.:</label>
+                        <output id="rateMaximum" name="rateMaximum" for="rateNameSelect"></output>
+                    </div>
+                    <div></div><button onclick="convertRate();" id="convertRateButton" name="convertRateButton" disabled>Convert rate</button>
+                    <button onclick="saveAsBoundaries();" id="saveAsBoundariesButton" name="saveAsBoundariesButton" disabled>Save boundaries</button>
                     <button onclick="saveAsPlan();" id="saveAsPlanButton" name="saveAsPlanButton" disabled>Save plan</button>
                 </div>
             </div>
@@ -76,6 +86,7 @@
     <script src="maplibre-gl/leaflet-maplibre-gl.js"></script>
     <script src="leaflet/esri-leaflet.js"></script>
     <script src="leaflet/esri-leaflet-vector.js"></script>
+    <script src="turf.min.js"></script>
     <script src="esri_access_token.js"></script>
     <script src="vigor22_base.js"></script>
     <script src="shapefile_conversion.js"></script>

@@ -82,6 +82,7 @@ function importShapes() {
         shapeInputForm.saveAsBoundariesButton.disabled = false;
         shapeInputForm.saveAsPlanButton.disabled = false;
         shapeInputForm.fileInput.value = "";
+        updateConfigMenu();
     }
     xhr.open('POST', '/api/convert_shape_files/');
     xhr.send(formData);
@@ -125,6 +126,45 @@ function saveAsPlan() {
     shapeInputForm.saveAsPlanButton.style.backgroundColor = '#ffcc0044';
     resetImportLayers();
 }
+
+function updateRateDropdown() {
+    let key = rateNameSelect.value;
+    let maxValue = turf.propReduce(importLayers.toGeoJSON(), function(previousValue, currentProperties, featureIndex) {
+        return Math.max(previousValue, currentProperties[key])
+    }, 0);
+    shapeInputForm.rateMaximum.value = maxValue;
+};
+
+function updateConfigMenu() {
+    convertRateButton.disabled = true;
+    rateNameSelect.length = 0;
+    shapeInputForm.rateMaximum.value = 0;
+    let features = importLayers.toGeoJSON().features;
+    if (features.length > 0) {
+        let properties = features[0].properties;
+        Object.keys(properties).forEach(key => {
+            if (typeof properties[key] === 'number') {
+                let opt = document.createElement('option');
+                opt.value = key;
+                opt.text = key;
+                rateNameSelect.appendChild(opt);
+            }
+        })
+        updateRateDropdown();
+        convertRateButton.disabled = false;
+    }
+};
+
+function convertRate() {
+    let myGeoJSON = importLayers.toGeoJSON();
+    let features = myGeoJSON.features;
+    let key = rateNameSelect.value;
+    turf.propEach(myGeoJSON, function(currentProperties, featureIndex) {
+        currentProperties["V22RATE"] = currentProperties[key] / shapeInputForm.rateMaximum.value;
+    });
+    importLayers.clearLayers();
+    importLayers.addData(myGeoJSON);
+};
 
 shapeInputForm.fileInput.onchange = () => {
     importShapes();
