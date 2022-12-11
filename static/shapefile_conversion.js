@@ -160,7 +160,7 @@ function convertRate() {
     let features = myGeoJSON.features;
     let key = rateNameSelect.value;
     turf.propEach(myGeoJSON, function(currentProperties, featureIndex) {
-        currentProperties["V22RATE"] = currentProperties[key] / shapeInputForm.rateMaximum.value;
+        currentProperties["V22RATE"] = (currentProperties[key] / shapeInputForm.rateMaximum.value).toFixed(2);
     });
     importLayers.clearLayers();
     importLayers.addData(myGeoJSON);
