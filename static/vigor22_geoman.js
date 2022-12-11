@@ -164,32 +164,6 @@ function exportBoundaries() {
     exportFromLayer(boundariesLayer, "boundaries");
 };
 
-function updateRateDropdown() {
-    let key = rateNameSelect.value;
-    let maxValue = turf.propReduce(planLayer.toGeoJSON(), function(previousValue, currentProperties, featureIndex) {
-        return Math.max(previousValue, currentProperties[key])
-    }, 0);
-    drawingInputInputForm.rateMaximum.value = maxValue;
-};
-
-function updateConfigMenu() {
-    rateNameSelect.length = 0;
-    drawingInputInputForm.rateMaximum.value = 0;
-    let features = planLayer.toGeoJSON().features;
-    if (features.length > 0) {
-        let properties = features[0].properties;
-        Object.keys(properties).forEach(key => {
-            if (typeof properties[key] === 'number') {
-                let opt = document.createElement('option');
-                opt.value = key;
-                opt.text = key;
-                rateNameSelect.appendChild(opt);
-            }
-        })
-        updateRateDropdown();
-    }
-};
-
 function importPlan() {
     let fileInput = document.getElementById("fileInput");
     let storedData = sessionStorage.getItem('vigor22:plan');
@@ -201,13 +175,11 @@ function importPlan() {
         var fr = new FileReader();
         fr.onload = function(fileData) {
             importFileContent(fileData.target.result, planLayer);
-            updateConfigMenu();
         };
         fr.readAsText(fileInput.files[i])
     }
     if (fileInput.files.length == 0) {
         importFileContent(storedData, planLayer);
-        updateConfigMenu();
     }
     fileInput.value = "";
 };
@@ -238,10 +210,7 @@ function importProject() {
             else if (planLayer.getBounds().isValid())
                 map.fitBounds(planLayer.getBounds());
             refreshImportLayerSelection();
-            updateConfigMenu();
             if (typeof projectInput.settings !== "undefined") {
-                drawingInputInputForm.rateMaximum.value = projectInput.settings.rate_maximum;
-                rateNameSelect.value = projectInput.settings.rate_key;
                 throwingRangeInput.value = projectInput.settings.throwing_range;
                 minSpeedInput.value = projectInput.settings.min_speed;
             }
@@ -262,8 +231,6 @@ function exportProject() {
         plan: planLayer.toGeoJSON(),
         other: otherLayers.toGeoJSON(),
         settings: {
-            rate_maximum: parseFloat(drawingInputInputForm.rateMaximum.value),
-            rate_key: rateNameSelect.value,
             throwing_range: parseFloat(throwingRangeInput.value),
             min_speed: parseFloat(minSpeedInput.value)
         }

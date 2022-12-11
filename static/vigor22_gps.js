@@ -388,17 +388,13 @@ function onLocationFound(e) {
             newRightRate = 1;
         turf.featureEach(planLayer.toGeoJSON(), function(feature, featureIndex) {
             if (leftInBounds && turf.booleanPointInPolygon(innerLeftPoint, feature)) {
-                if (typeof feature.properties[settings.rate_key] !== "undefined") {
-                    newLeftRate = feature.properties[settings.rate_key] / settings.rate_maximum;
-                } else if (typeof feature.properties.RATE !== "undefined") {
-                    newLeftRate = feature.properties.RATE / 100;
+                if (typeof feature.properties.V22RATE !== "undefined") {
+                    newLeftRate = feature.properties.V22RATE;
                 }
             }
             if (rightInBounds && turf.booleanPointInPolygon(innerRightPoint, feature)) {
-                if (typeof feature.properties[settings.rate_key] !== "undefined") {
-                    newRightRate = feature[settings.rate_key] / settings.rate_maximum;
-                } else if (typeof feature.properties.RATE !== "undefined") {
-                    newRightRate = feature.properties.RATE / 100;
+                if (typeof feature.properties.V22RATE !== "undefined") {
+                    newRightRate = feature.properties.V22RATE;
                 }
             }
         });
