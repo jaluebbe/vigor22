@@ -94,6 +94,7 @@ layerControl.addOverlay(boundariesLayer, boundariesLayerLabel);
 layerControl.addOverlay(planLayer, planLayerLabel);
 layerControl.addOverlay(protocolLayer, protocolLayerLabel);
 var settings = {};
+var noSleep = new NoSleep();
 
 function importProjectFileContent(fileContent) {
     let projectInput = JSON.parse(fileContent);
@@ -116,6 +117,7 @@ function importProject() {
     if (fileInput.files.length == 0 && storedData == null) {
         return;
     }
+    noSleep.enable();
     boundariesLayer.clearLayers();
     planLayer.clearLayers();
     otherLayers.clearLayers();
