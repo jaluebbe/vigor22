@@ -103,7 +103,6 @@ map.pm.addControls({
     drawMarker: false,
     dragMode: false,
     rotateMode: false,
-//    cutMode: false,
     cutPolygon: false,
     oneBlock: true,
 });
