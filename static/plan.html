@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>Vigor 22 - Plan</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="leaflet/leaflet.css">
+    <link rel="stylesheet" href="maplibre-gl/maplibre-gl.css">
+    <link rel="stylesheet" href="leaflet/leaflet-geoman.css">
+    <link rel="stylesheet" href="vigor22.css">
+    <style>
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+
+        .tooltip-grid-container {
+            display: grid;
+            grid-template-columns: auto auto;
+            column-gap: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <template id="shapeInputTemplate">
+        <form name="shapeInputForm" onsubmit="return false;">
+            <div class="grid-container">
+                <h4>Plan shapefile conversion</h4>
+                <input id="fileInput" name="fileInput" type="file" multiple>
+                <div><select id="inputCrs" name="inputCrs">
+                        <option selected value="EPSG:4326">WGS84</option>
+                        <option value="EPSG:3857">Web Mercator</option>
+                        <option value="EPSG:25832">ETRS89</option>
+                        <option value="EPSG:2056">CH1903+/LV95</option>
+                        <option value="EPSG:4269">NAD83</option>
+                        <option value="EPSG:27700">OSGB36</option>
+                    </select>&nbsp;<label for="inputCrs">Geodetic CRS</label></div>
+                <button onclick="exportShapes();" id="exportButton" name="exportButton" disabled>Export plan</button>
+                <div></div><select id="rateNameSelect" name="rateNameSelect" onchange="updateRateDropdown();">
+                </select>
+                <div></div>
+                <div>
+                    <label for="rateMaximum">Max.:</label>
+                    <output id="rateMaximum" name="rateMaximum" for="rateNameSelect"></output>
+                </div>
+                <div></div><button onclick="convertRate();" id="convertRateButton" name="convertRateButton" disabled>Convert rate</button>
+                <button onclick="saveAsPlan();" id="saveAsPlanButton" name="saveAsPlanButton" disabled>Save plan</button>
+            </div>
+        </form>
+    </template>
+    <div id="map"></div>
+    <div class="navbar" id="myNavbar">
+        <a href="./boundaries.html" onclick="storeMapView()">Boundaries</a>
+        <a href="./plan.html" class="active" onclick="storeMapView()">Plan</a>
+        <a href="./project.html" onclick="storeMapView()">Project</a>
+        <a href="./gps_map.html" onclick="storeMapView()">GPS map</a>
+        <a href="./review.html" onclick="storeMapView()">Review</a>
+        <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="myFunction()">&#9776;</a>
+    </div>
+    <script src="leaflet/leaflet.js"></script>
+    <script src="leaflet/leaflet-geoman.min.js"></script>
+    <script src="maplibre-gl/maplibre-gl.js"></script>
+    <script src="maplibre-gl/leaflet-maplibre-gl.js"></script>
+    <script src="leaflet/esri-leaflet.js"></script>
+    <script src="leaflet/esri-leaflet-vector.js"></script>
+    <script src="turf.min.js"></script>
+    <script src="esri_access_token.js"></script>
+    <script src="plan_maps.js"></script>
+    <script src="plan.js"></script>
+</body>
+
+</html>
