@@ -20,6 +20,9 @@ function onEachFeature(feature, layer) {
         direction: "top",
         offset: [0, -5]
     });
+    layer.on('click', function(eo) {
+        console.log(eo);
+    });
 }
 
 function styleShape(feature, styleProperties) {
