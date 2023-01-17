@@ -35,7 +35,7 @@ function onEachFeature(feature, layer) {
         offset: [0, -5]
     });
     layer.on('click', function(eo) {
-        clickedShape();
+        clickedShape(eo);
     });
 }
 
