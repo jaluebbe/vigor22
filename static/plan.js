@@ -15,6 +15,19 @@ function formatTooltip(content) {
     return str;
 }
 
+function clickedShape(eo) {
+    selectedShape = eo.target;
+    rateEditInput.disabled = false;
+    let rateProperty = selectedShape.feature.properties.V22RATE;
+    if (typeof rateProperty === "undefined") {
+        rateEditInput.value = "";
+    } else {
+        rateEditInput.value = parseFloat(rateProperty)*100;
+    }
+    L.DomEvent.stopPropagation(eo);
+
+};
+
 function onEachFeature(feature, layer) {
     layer.bindTooltip(formatTooltip(feature.properties), {
         sticky: true,
@@ -22,12 +35,21 @@ function onEachFeature(feature, layer) {
         offset: [0, -5]
     });
     layer.on('click', function(eo) {
-        selectedShape = eo.target;
-        rateEditInput.disabled = false;
-        rateEditInput.value = parseFloat(selectedShape.feature.properties.V22RATE)*100;
-        L.DomEvent.stopPropagation(eo);
+        clickedShape();
     });
 }
+
+map.on('pm:create', function(eo) {
+    eo.layer.feature = {properties: {}};
+    eo.layer.bindTooltip(formatTooltip({}), {
+        sticky: true,
+        direction: "top",
+        offset: [0, -5]
+    });
+    eo.layer.on({
+        click: clickedShape
+    })
+});
 
 function styleShape(feature, styleProperties) {
     return styleProperties;
