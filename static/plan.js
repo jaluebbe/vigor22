@@ -1,4 +1,5 @@
 exportName = "plan";
+var selectedShape = undefined;
 
 function getDateString() {
     let date = new Date();
@@ -21,7 +22,10 @@ function onEachFeature(feature, layer) {
         offset: [0, -5]
     });
     layer.on('click', function(eo) {
-        console.log(eo);
+        selectedShape = eo.target;
+        rateEditInput.disabled = false;
+        rateEditInput.value = parseFloat(selectedShape.feature.properties.V22RATE)*100;
+        L.DomEvent.stopPropagation(eo);
     });
 }
 
@@ -178,6 +182,29 @@ function myFunction() {
         x.className = "navbar";
     }
 }
+
+var rateEditLegend = L.control({
+    position: 'topleft'
+});
+rateEditLegend.onAdd = function(map) {
+    this._div = L.DomUtil.create('div', 'info legend');
+    let tempSource = document.getElementById('rateEditTemplate');
+    this._div.appendChild(tempSource.content.cloneNode(true));
+    L.DomEvent.disableClickPropagation(this._div);
+    return this._div;
+}
+rateEditLegend.addTo(map);
+
+function rateEditChanged() {
+    selectedShape.feature.properties.V22RATE = parseFloat(rateEditInput.value) / 100;
+    selectedShape.setTooltipContent(formatTooltip(selectedShape.feature.properties));
+};
+
+map.on('click', function(eo) {
+    selectedShape = undefined;
+    rateEditInput.disabled = true;
+    rateEditInput.value = "";
+});
 
 shapeInputForm.fileInput.onchange = () => {
     importShapes();

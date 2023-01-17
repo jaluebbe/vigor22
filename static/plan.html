@@ -60,6 +60,16 @@
             </div>
         </form>
     </template>
+    <template id="rateEditTemplate">
+        <form name="rateEditInputForm" onsubmit="return false;">
+            <div class="grid-container">
+                <div class="two-columns">
+                    <div>Rate</div>
+                    <div><input type="number" name="rateEditInput" id="rateEditInput" min="0" max="100" step="1" disabled onchange="rateEditChanged();"></input>&nbsp;%</div>
+                </div>
+            </div>
+        </form>
+    </template>
     <div id="map"></div>
     <div class="navbar" id="myNavbar">
         <a href="./boundaries.html" onclick="storeMapView()">Boundaries</a>
