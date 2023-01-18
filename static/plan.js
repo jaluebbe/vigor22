@@ -160,6 +160,8 @@ function loadPlan() {
     importLayers.clearLayers();
     importLayers.addData(JSON.parse(storedData));
     map.fitBounds(importLayers.getBounds());
+    enableButtons();
+    updateConfigMenu();
 };
 
 function saveAsPlan() {

@@ -143,6 +143,7 @@ function loadBoundaries() {
     importLayers.clearLayers();
     importLayers.addData(JSON.parse(storedData));
     map.fitBounds(importLayers.getBounds());
+    enableButtons();
 };
 
 function myFunction() {
