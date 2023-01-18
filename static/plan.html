@@ -39,24 +39,23 @@
             <div class="grid-container">
                 <h4>Plan shapefile conversion</h4>
                 <input id="fileInput" name="fileInput" type="file" multiple>
-                <div><select id="inputCrs" name="inputCrs">
+                <div class="two-columns">
+                    <select id="inputCrs" name="inputCrs">
                         <option selected value="EPSG:4326">WGS84</option>
                         <option value="EPSG:3857">Web Mercator</option>
                         <option value="EPSG:25832">ETRS89</option>
                         <option value="EPSG:2056">CH1903+/LV95</option>
                         <option value="EPSG:4269">NAD83</option>
                         <option value="EPSG:27700">OSGB36</option>
-                    </select>&nbsp;<label for="inputCrs">Geodetic CRS</label></div>
-                <button onclick="exportShapes();" id="exportButton" name="exportButton" disabled>Export plan</button>
-                <div></div><select id="rateNameSelect" name="rateNameSelect" onchange="updateRateDropdown();">
-                </select>
-                <div></div>
-                <div>
-                    <label for="rateMaximum">Max.:</label>
-                    <output id="rateMaximum" name="rateMaximum" for="rateNameSelect"></output>
-                </div>
-                <div></div><button onclick="convertRate();" id="convertRateButton" name="convertRateButton" disabled>Convert rate</button>
-                <div class="two-columns">
+                    </select>
+                    <label for="inputCrs">Geodetic CRS</label>
+                    <select id="rateNameSelect" name="rateNameSelect" onchange="updateRateDropdown();"></select>
+                    <div>
+                        <label for="rateMaximum">Max.:</label>
+                        <output id="rateMaximum" name="rateMaximum" for="rateNameSelect"></output>
+                    </div>
+                    <button onclick="convertRate();" id="convertRateButton" name="convertRateButton" disabled>Convert rate</button>
+                    <button onclick="exportShapes();" id="exportButton" name="exportButton" disabled>Export plan</button>
                     <button onclick="saveAsPlan();" id="saveAsPlanButton" name="saveAsPlanButton" disabled>Save plan</button>
                     <button onclick="loadPlan();" id="loadPlanButton" name="loadPlanButton">Load plan</button>
                 </div>
@@ -66,10 +65,8 @@
     <template id="rateEditTemplate">
         <form name="rateEditInputForm" onsubmit="return false;">
             <div class="grid-container">
-                <div class="two-columns">
-                    <div>Rate</div>
-                    <div><input type="number" name="rateEditInput" id="rateEditInput" min="0" max="100" step="1" disabled onchange="rateEditChanged();"></input>&nbsp;%</div>
-                </div>
+                <div>Rate (%)</div>
+                <input type="number" name="rateEditInput" id="rateEditInput" min="0" max="100" step="1" disabled onchange="rateEditChanged();">
             </div>
         </form>
     </template>

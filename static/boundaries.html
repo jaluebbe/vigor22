@@ -40,14 +40,17 @@
             <div class="grid-container">
                 <h4>Boundary shapefile conversion</h4>
                 <input id="fileInput" name="fileInput" type="file" multiple>
-                <div><select id="inputCrs" name="inputCrs">
+                <div class="two-columns">
+                    <select id="inputCrs" name="inputCrs">
                         <option selected value="EPSG:4326">WGS84</option>
                         <option value="EPSG:3857">Web Mercator</option>
                         <option value="EPSG:25832">ETRS89</option>
                         <option value="EPSG:2056">CH1903+/LV95</option>
                         <option value="EPSG:4269">NAD83</option>
                         <option value="EPSG:27700">OSGB36</option>
-                    </select>&nbsp;<label for="inputCrs">Geodetic CRS</label></div>
+                    </select>
+                    <label for="inputCrs">Geodetic CRS</label>
+                </div>
                 <button onclick="exportShapes();" id="exportButton" name="exportButton" disabled>Export boundaries</button>
                 <div class="two-columns">
                     <button onclick="saveAsBoundaries();" id="saveAsBoundariesButton" name="saveAsBoundariesButton" disabled>Save boundaries</button>
