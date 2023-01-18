@@ -129,6 +129,10 @@ map.pm.addControls({
     oneBlock: true,
 });
 
+map.pm.setGlobalOptions({
+    layerGroup: importLayers,
+});
+
 function enableButtons() {
     shapeInputForm.exportButton.disabled = false;
     shapeInputForm.saveAsPlanButton.disabled = false;

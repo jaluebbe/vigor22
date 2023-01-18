@@ -1,4 +1,5 @@
 exportName = "boundaries";
+var removedLayers = undefined;
 
 function getDateString() {
     let date = new Date();
@@ -105,6 +106,10 @@ map.pm.addControls({
     rotateMode: false,
     cutPolygon: false,
     oneBlock: true,
+});
+
+map.pm.setGlobalOptions({
+    layerGroup: importLayers,
 });
 
 function enableButtons() {
