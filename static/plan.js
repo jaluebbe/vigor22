@@ -152,6 +152,16 @@ function exportShapes() {
     }
 }
 
+function loadPlan() {
+    let storedData = sessionStorage.getItem('vigor22:plan');
+    if (storedData == null) {
+        return;
+    }
+    importLayers.clearLayers();
+    importLayers.addData(JSON.parse(storedData));
+    map.fitBounds(importLayers.getBounds());
+};
+
 function saveAsPlan() {
     let saveData = JSON.stringify(importLayers.toGeoJSON());
     sessionStorage.setItem('vigor22:plan', saveData);

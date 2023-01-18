@@ -56,7 +56,10 @@
                     <output id="rateMaximum" name="rateMaximum" for="rateNameSelect"></output>
                 </div>
                 <div></div><button onclick="convertRate();" id="convertRateButton" name="convertRateButton" disabled>Convert rate</button>
-                <button onclick="saveAsPlan();" id="saveAsPlanButton" name="saveAsPlanButton" disabled>Save plan</button>
+                <div class="two-columns">
+                    <button onclick="saveAsPlan();" id="saveAsPlanButton" name="saveAsPlanButton" disabled>Save plan</button>
+                    <button onclick="loadPlan();" id="loadPlanButton" name="loadPlanButton">Load plan</button>
+                </div>
             </div>
         </form>
     </template>

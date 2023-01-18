@@ -135,6 +135,16 @@ function saveAsBoundaries() {
     sessionStorage.setItem('vigor22:boundaries', saveData);
 }
 
+function loadBoundaries() {
+    let storedData = sessionStorage.getItem('vigor22:boundaries');
+    if (storedData == null) {
+        return;
+    }
+    importLayers.clearLayers();
+    importLayers.addData(JSON.parse(storedData));
+    map.fitBounds(importLayers.getBounds());
+};
+
 function myFunction() {
     var x = document.getElementById("myNavbar");
     if (x.className === "navbar") {
