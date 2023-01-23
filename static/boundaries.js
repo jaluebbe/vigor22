@@ -80,7 +80,6 @@ function importShapes() {
         exportName = jsonResponse.file_name;
         importLayers.addData(jsonResponse.geojson);
         map.fitBounds(importLayers.getBounds());
-        enableButtons();
         shapeInputForm.fileInput.value = "";
     }
     xhr.open('POST', '/api/convert_shape_files/');
@@ -111,11 +110,6 @@ map.pm.addControls({
 map.pm.setGlobalOptions({
     layerGroup: importLayers,
 });
-
-function enableButtons() {
-    shapeInputForm.exportButton.disabled = false;
-    shapeInputForm.saveAsBoundariesButton.disabled = false;
-}
 
 function exportShapes() {
     let fileName = prompt('Choose file name', exportName + '_' + getDateString() + '.json');
@@ -148,7 +142,6 @@ function loadBoundaries() {
     importLayers.clearLayers();
     importLayers.addData(JSON.parse(storedData));
     map.fitBounds(importLayers.getBounds());
-    enableButtons();
 };
 
 function myFunction() {
