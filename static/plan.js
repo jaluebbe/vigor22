@@ -40,7 +40,6 @@ function onEachFeature(feature, layer) {
 }
 
 map.on('pm:create', function(eo) {
-    eo.layer.feature = {properties: {}};
     eo.layer.bindTooltip(formatTooltip({}), {
         sticky: true,
         direction: "top",
