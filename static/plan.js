@@ -16,6 +16,7 @@ function formatTooltip(content) {
 }
 
 function clickedShape(eo) {
+    if (map.pm.globalDrawModeEnabled()) {return;}
     selectedShape = eo.target;
     rateEditInput.disabled = false;
     let rateProperty = selectedShape.feature.properties.V22RATE;
@@ -47,7 +48,10 @@ map.on('pm:create', function(eo) {
     });
     eo.layer.on({
         click: clickedShape
-    })
+    });
+    let feature = eo.layer.feature = eo.layer.feature || {};
+    feature.type = feature.type || "Feature";
+    let props = feature.properties = feature.properties || {};
 });
 
 function styleShape(feature, styleProperties) {
