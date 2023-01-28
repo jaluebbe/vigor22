@@ -364,11 +364,10 @@ function onLocationFound(e) {
         let rightInBounds = outerRightInBounds && innerRightInBounds && firstRightQuartileInBounds && thirdRightQuartileInBounds;
         let newLeftRate = 0;
         let newRightRate = 0;
-        let planMissing = planLayer.getLayers().length == 0;
-        if (leftInBounds && planMissing)
-            newLeftRate = 1;
-        if (rightInBounds && planMissing)
-            newRightRate = 1;
+        if (leftInBounds)
+            newLeftRate = settings.default_rate;
+        if (rightInBounds)
+            newRightRate = settings.default_rate;
         turf.featureEach(planLayer.toGeoJSON(), function(feature, featureIndex) {
             if (leftInBounds && turf.booleanPointInPolygon(innerLeftPoint, feature)) {
                 if (typeof feature.properties.V22RATE !== "undefined") {
