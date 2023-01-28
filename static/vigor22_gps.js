@@ -1,4 +1,3 @@
-map.createPane('other');
 map.createPane('boundaries');
 map.createPane('plan');
 map.createPane('protocol');
@@ -7,7 +6,6 @@ map.createPane('vehicle');
 map.getPane('boundaries').style.zIndex = 390;
 map.getPane('plan').style.zIndex = 391;
 map.getPane('protocol').style.zIndex = 392;
-map.getPane('other').style.zIndex = 393;
 map.getPane('active').style.zIndex = 394;
 map.getPane('vehicle').style.zIndex = 395;
 
@@ -37,18 +35,6 @@ function styleShape(feature, styleProperties) {
     return styleProperties;
 }
 
-var otherLayers = L.geoJSON([], {
-    onEachFeature: onEachFeature,
-    pane: 'other',
-    style: function(feature) {
-        return styleShape(feature, {
-            fillColor: "#ff0000",
-            fillOpacity: 0.1,
-            weight: 1.5,
-            color: "grey"
-        });
-    }
-}).addTo(map);
 var boundariesLayer = L.geoJSON([], {
     onEachFeature: onEachFeature,
     pane: 'boundaries',
@@ -85,11 +71,9 @@ var protocolLayer = L.geoJSON([], {
         });
     }
 }).addTo(map);
-var otherLayersLabel = "<span style='background-color:rgba(255, 0, 0, 0.2)'>other layers</span>";
 var boundariesLayerLabel = "<span style='background-color:rgba(0, 51, 153, 0.2)'>Boundaries</span>";
 var planLayerLabel = "<span style='background-color:rgba(255, 204, 0, 0.2)'>Plan</span>";
 var protocolLayerLabel = "<span style='background-color:rgba(0, 238, 0, 0.2)'>Protocol</span>";
-layerControl.addOverlay(otherLayers, otherLayersLabel);
 layerControl.addOverlay(boundariesLayer, boundariesLayerLabel);
 layerControl.addOverlay(planLayer, planLayerLabel);
 layerControl.addOverlay(protocolLayer, protocolLayerLabel);
@@ -104,7 +88,6 @@ function importProjectFileContent(fileContent) {
         protocolLayer.addData(projectInput.protocol);
     }
     Object.assign(settings, projectInput.settings);
-    otherLayers.addData(projectInput.other);
     if (boundariesLayer.getBounds().isValid())
         map.fitBounds(boundariesLayer.getBounds());
     else if (planLayer.getBounds().isValid())
@@ -120,7 +103,6 @@ function importProject() {
     noSleep.enable();
     boundariesLayer.clearLayers();
     planLayer.clearLayers();
-    otherLayers.clearLayers();
     protocolLayer.clearLayers();
     for (const key in settings) {
         delete settings[key];
@@ -148,7 +130,6 @@ function exportProject() {
         boundaries: boundariesLayer.toGeoJSON(),
         plan: planLayer.toGeoJSON(),
         protocol: protocolLayer.toGeoJSON(),
-        other: otherLayers.toGeoJSON(),
         settings: settings
     });
     sessionStorage.setItem('vigor22:project', dataExport);
