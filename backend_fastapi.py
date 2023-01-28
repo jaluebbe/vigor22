@@ -21,7 +21,7 @@ app.mount("/fonts", StaticFiles(directory="fonts"), name="fonts")
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return RedirectResponse("/static/shapefile_conversion.html")
+    return RedirectResponse("/static/boundaries.html")
 
 
 @app.post("/api/convert_shape_files/")
