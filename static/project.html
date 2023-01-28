@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>Vigor 22 - Project</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="leaflet/leaflet.css">
+    <link rel="stylesheet" href="maplibre-gl/maplibre-gl.css">
+    <link rel="stylesheet" href="vigor22.css">
+    <style>
+        .two-columns {
+            display: grid;
+            grid-template-columns: auto auto;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+
+        .three-columns {
+            display: grid;
+            grid-template-columns: auto 1fr 1fr;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+
+        .tooltip-grid-container {
+            display: grid;
+            grid-template-columns: auto auto;
+            column-gap: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <template id="dataTransferInputTemplate">
+        <form name="dataTransferInputForm" onsubmit="return false;">
+            <div class="grid-container">
+                <h4>Data Transfer</h4>
+                <input type="file" id="fileInput" accept=".geojson,application/json,application/geo+json" multiple>
+                <div class="three-columns">
+                    <div style="margin: auto;">Boundaries</div>
+                    <button onclick="importBoundaries();" id="importBoundariesButton" name="importBoundariesButton">import</button>
+                    <button onclick="exportBoundaries();" id="exportBoundariesButton" name="exportBoundariesButton">export</button>
+                    <div style="margin: auto;">Plan</div>
+                    <button onclick="importPlan();" id="importPlanButton" name="importPlanButton">import</button>
+                    <button onclick="exportPlan();" id="exportPlanButton" name="exportPlanButton">export</button>
+                    <div style="margin: auto;">Project</div>
+                    <button onclick="importProject();" id="importProjectButton" name="importProjectButton">import</button>
+                    <button onclick="exportProject();" id="exportProjectButton" name="exportProjectButton">export</button>
+                </div>
+            </div>
+        </form>
+    </template>
+    <template id="drawingInputTemplate">
+        <form name="drawingInputInputForm" onsubmit="return false;">
+            <div class="grid-container">
+                <h4>Project settings</h4>
+                <div class="two-columns">
+                    <div>Range</div>
+                    <div><input type="number" name="throwingRangeInput" id="throwingRangeInput" min="5" max="50" step="0.5" value="15"></input>&nbsp;m</div>
+                    <div>Speed</div>
+                    <div><input type="number" name="minSpeedInput" id="minSpeedInput" min="1" max="10" step="0.1" value="1"></input>&nbsp;m/s</div>
+                    <div>Default rate</div>
+                    <div><input type="number" name="defaultRateInput" id="defaultRateInput" min="0" max="100" step="1" value="0"></input>&nbsp;%</div>
+                </div>
+            </div>
+        </form>
+    </template>
+    <div class="navbar" id="myNavbar">
+        <a href="./boundaries.html" onclick="storeMapView()">Boundaries</a>
+        <a href="./plan.html" onclick="storeMapView()">Plan</a>
+        <a href="./project.html" class="active" onclick="storeMapView()">Project</a>
+        <a href="./gps_map.html" onclick="storeMapView()">GPS map</a>
+        <a href="./review.html" onclick="storeMapView()">Review</a>
+        <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="myFunction()">&#9776;</a>
+    </div>
+    <script>
+        function myFunction() {
+            var x = document.getElementById("myNavbar");
+            if (x.className === "navbar") {
+                x.className += " responsive";
+            } else {
+                x.className = "navbar";
+            }
+        }
+    </script>
+    <script src="leaflet/leaflet.js"></script>
+    <script src="turf.min.js"></script>
+    <script src="maplibre-gl/maplibre-gl.js"></script>
+    <script src="maplibre-gl/leaflet-maplibre-gl.js"></script>
+    <script src="leaflet/esri-leaflet.js"></script>
+    <script src="leaflet/esri-leaflet-vector.js"></script>
+    <script src="esri_access_token.js"></script>
+    <script src="project_maps.js"></script>
+    <script src="project.js"></script>
+</body>
+
+</html>
