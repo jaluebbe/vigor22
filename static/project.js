@@ -8,7 +8,11 @@ map.getPane('protocol').style.zIndex = 392;
 function formatTooltip(content) {
     str = '<div class="tooltip-grid-container">';
     for (const key in content) {
-        str = str + "<div>" + key + ":</div><div>" + content[key] + "</div>";
+        if (key == "V22RATE") {
+            str = str + "<div>" + key + ":</div><div>" + (100 * content[key]).toFixed(0) + "&percnt;</div>";
+        } else {
+            str = str + "<div>" + key + ":</div><div>" + content[key] + "</div>";
+        }
     }
     str = str + "</div>";
     return str;
@@ -74,9 +78,8 @@ layerControl.addOverlay(boundariesLayer, boundariesLayerLabel);
 layerControl.addOverlay(planLayer, planLayerLabel);
 layerControl.addOverlay(protocolLayer, protocolLayerLabel);
 
-function importFileContent(fileContent, targetLayer, showMeasurements = false) {
+function importFileContent(fileContent, targetLayer) {
     let geojsonInput = JSON.parse(fileContent);
-    L.Polygon.prototype.options.showMeasurements = showMeasurements;
     targetLayer.addData(geojsonInput);
     map.fitBounds(targetLayer.getBounds());
 };
@@ -109,12 +112,12 @@ function importBoundaries() {
     for (var i = 0; i < fileInput.files.length; i++) {
         var fr = new FileReader();
         fr.onload = function(fileData) {
-            importFileContent(fileData.target.result, boundariesLayer, true);
+            importFileContent(fileData.target.result, boundariesLayer);
         };
         fr.readAsText(fileInput.files[i])
     }
     if (fileInput.files.length == 0) {
-        importFileContent(storedData, boundariesLayer, true);
+        importFileContent(storedData, boundariesLayer);
     }
     fileInput.value = "";
 };
@@ -154,12 +157,16 @@ function importProject() {
     }
     boundariesLayer.clearLayers();
     planLayer.clearLayers();
+    protocolLayer.clearLayers();
     for (var i = 0; i < fileInput.files.length; i++) {
         var fr = new FileReader();
         fr.onload = function(fileData) {
             let projectInput = JSON.parse(fileData.target.result);
             boundariesLayer.addData(projectInput.boundaries);
             planLayer.addData(projectInput.plan);
+            if (projectInput.protocol != null) {
+                protocolLayer.addData(projectInput.protocol);
+            }
             if (boundariesLayer.getBounds().isValid())
                 map.fitBounds(boundariesLayer.getBounds());
             else if (planLayer.getBounds().isValid())
@@ -228,3 +235,4 @@ drawingLegend.onAdd = function(map) {
 drawingLegend.addTo(map);
 
 restoreMapView();
+importBoundaries();

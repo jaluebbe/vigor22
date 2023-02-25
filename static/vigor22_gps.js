@@ -12,7 +12,11 @@ map.getPane('vehicle').style.zIndex = 395;
 function formatTooltip(content) {
     str = '<div class="tooltip-grid-container">';
     for (const key in content) {
-        str = str + "<div>" + key + ":</div><div>" + content[key] + "</div>";
+        if (key == "V22RATE") {
+            str = str + "<div>" + key + ":</div><div>" + (100 * content[key]).toFixed(0) + "&percnt;</div>";
+        } else {
+            str = str + "<div>" + key + ":</div><div>" + content[key] + "</div>";
+        }
     }
     str = str + "</div>";
     return str;

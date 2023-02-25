@@ -1,3 +1,8 @@
+map.createPane('boundaries');
+map.createPane('plan');
+map.getPane('boundaries').style.zIndex = 390;
+map.getPane('plan').style.zIndex = 391;
+
 exportName = "plan";
 var selectedShape = undefined;
 
@@ -9,7 +14,11 @@ function getDateString() {
 function formatTooltip(content) {
     str = '<div class="tooltip-grid-container">';
     for (const key in content) {
-        str = str + "<div>" + key + ":</div><div>" + content[key] + "</div>";
+        if (key == "V22RATE") {
+            str = str + "<div>" + key + ":</div><div>" + (100 * content[key]).toFixed(0) + "&percnt;</div>";
+        } else {
+            str = str + "<div>" + key + ":</div><div>" + content[key] + "</div>";
+        }
     }
     str = str + "</div>";
     return str;
@@ -23,7 +32,7 @@ function clickedShape(eo) {
     if (typeof rateProperty === "undefined") {
         rateEditInput.value = "";
     } else {
-        rateEditInput.value = parseFloat(rateProperty)*100;
+        rateEditInput.value = (parseFloat(rateProperty) * 100).toFixed(0);
     }
     L.DomEvent.stopPropagation(eo);
 
@@ -58,22 +67,33 @@ function styleShape(feature, styleProperties) {
     return styleProperties;
 }
 
-var importLayers = L.geoJSON([], {
-    onEachFeature: onEachFeature,
-    pointToLayer: function(geoJsonPoint, latlng) {
-        return L.circleMarker(latlng, {
-            radius: 5
-        });
-    },
+var boundariesLayer = L.geoJSON([], {
+    pane: 'boundaries',
     style: function(feature) {
         return styleShape(feature, {
-            fillColor: "#0000ff",
+            fillColor: "#003399",
             fillOpacity: 0.1,
-            weight: 1.0,
+            weight: 1.5,
             color: "blue"
         });
-    }
+    },
+    pmIgnore: true
 }).addTo(map);
+var planLayer = L.geoJSON([], {
+    onEachFeature: onEachFeature,
+    pane: 'plan',
+    style: function(feature) {
+        return styleShape(feature, {
+            fillColor: "#ffcc00",
+            fillOpacity: 0.15,
+            weight: 1.5,
+            color: "grey"
+        });
+    }}).addTo(map);
+var boundariesLayerLabel = "<span style='background-color:rgba(0, 51, 153, 0.2)'>Boundaries</span>";
+var planLayerLabel = "<span style='background-color:rgba(255, 204, 0, 0.2)'>Plan</span>";
+layerControl.addOverlay(boundariesLayer, boundariesLayerLabel);
+layerControl.addOverlay(planLayer, planLayerLabel);
 
 var legend = L.control({
     position: 'topright'
@@ -87,6 +107,14 @@ legend.onAdd = function(map) {
 }
 legend.addTo(map);
 
+function importBoundaries() {
+    let storedData = sessionStorage.getItem('vigor22:boundaries');
+    if (storedData != null) {
+        boundariesLayer.clearLayers();
+        boundariesLayer.addData(JSON.parse(storedData));
+    }
+};
+
 function importShapes() {
     const files = shapeInputForm.fileInput.files;
     if (files.length == 0)
@@ -98,7 +126,7 @@ function importShapes() {
     formData.append('input_crs', shapeInputForm.inputCrs.value);
     const xhr = new XMLHttpRequest();
     xhr.onload = () => {
-        importLayers.clearLayers();
+        planLayer.clearLayers();
         if (xhr.status != 200) {
             if (xhr.responseText == 'Internal Server Error') {
                 alert(xhr.responseText);
@@ -109,8 +137,8 @@ function importShapes() {
         }
         jsonResponse = JSON.parse(xhr.responseText);
         exportName = jsonResponse.file_name;
-        importLayers.addData(jsonResponse.geojson);
-        map.fitBounds(importLayers.getBounds());
+        planLayer.addData(jsonResponse.geojson);
+        map.fitBounds(planLayer.getBounds());
         shapeInputForm.fileInput.value = "";
         updateConfigMenu();
     }
@@ -132,7 +160,14 @@ map.pm.addControls({
 });
 
 map.pm.setGlobalOptions({
-    layerGroup: importLayers,
+    layerGroup: planLayer,
+});
+
+map.pm.setPathOptions({
+  color: 'grey',
+  weight: 1.5,
+  fillColor: '#ffcc00',
+  fillOpacity: 0.15
 });
 
 function exportShapes() {
@@ -141,7 +176,7 @@ function exportShapes() {
         return;
     }
     var pom = document.createElement('a');
-    let exportData = JSON.stringify(importLayers.toGeoJSON());
+    let exportData = JSON.stringify(planLayer.toGeoJSON());
     pom.setAttribute('href', 'data:application/geo+json;charset=utf-8,' + encodeURIComponent(exportData));
     pom.setAttribute('download', fileName);
     if (document.createEvent) {
@@ -158,20 +193,20 @@ function loadPlan() {
     if (storedData == null) {
         return;
     }
-    importLayers.clearLayers();
-    importLayers.addData(JSON.parse(storedData));
-    map.fitBounds(importLayers.getBounds());
+    planLayer.clearLayers();
+    planLayer.addData(JSON.parse(storedData));
+    map.fitBounds(planLayer.getBounds());
     updateConfigMenu();
 };
 
 function saveAsPlan() {
-    let saveData = JSON.stringify(importLayers.toGeoJSON());
+    let saveData = JSON.stringify(planLayer.toGeoJSON());
     sessionStorage.setItem('vigor22:plan', saveData);
 }
 
 function updateRateDropdown() {
     let key = rateNameSelect.value;
-    let maxValue = turf.propReduce(importLayers.toGeoJSON(), function(previousValue, currentProperties, featureIndex) {
+    let maxValue = turf.propReduce(planLayer.toGeoJSON(), function(previousValue, currentProperties, featureIndex) {
         return Math.max(previousValue, currentProperties[key])
     }, 0);
     shapeInputForm.rateMaximum.value = maxValue;
@@ -181,7 +216,7 @@ function updateConfigMenu() {
     convertRateButton.disabled = true;
     rateNameSelect.length = 0;
     shapeInputForm.rateMaximum.value = 0;
-    let features = importLayers.toGeoJSON().features;
+    let features = planLayer.toGeoJSON().features;
     if (features.length > 0) {
         let properties = features[0].properties;
         Object.keys(properties).forEach(key => {
@@ -198,14 +233,14 @@ function updateConfigMenu() {
 }
 
 function convertRate() {
-    let myGeoJSON = importLayers.toGeoJSON();
+    let myGeoJSON = planLayer.toGeoJSON();
     let features = myGeoJSON.features;
     let key = rateNameSelect.value;
     turf.propEach(myGeoJSON, function(currentProperties, featureIndex) {
         currentProperties["V22RATE"] = (currentProperties[key] / shapeInputForm.rateMaximum.value).toFixed(2);
     });
-    importLayers.clearLayers();
-    importLayers.addData(myGeoJSON);
+    planLayer.clearLayers();
+    planLayer.addData(myGeoJSON);
 }
 
 function myFunction() {
@@ -244,3 +279,4 @@ shapeInputForm.fileInput.onchange = () => {
     importShapes();
 }
 restoreMapView();
+importBoundaries();
