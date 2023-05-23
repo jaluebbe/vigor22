@@ -188,6 +188,19 @@ function exportProject() {
     if (fileName === null || fileName.length == 0) {
         return;
     }
+    if (planLayer.toGeoJSON().features.length == 0) {
+        if (boundariesLayer.toGeoJSON().features.length == 0) {
+            alert('Project incomplete: boundaries + plan missing!');
+        } else if (defaultRateInput.value == 0) {
+            alert('Project incomplete: add plan or set default rate!');
+        }
+    } else {
+        if (boundariesLayer.toGeoJSON().features.length == 0) {
+            let generatedBoundaries = turf.dissolve(turf.flatten(turf.buffer(planLayer.toGeoJSON(), 0.0001)))
+            boundariesLayer.addData(generatedBoundaries);
+            alert('Generated missing boundaries from plan.');
+        }
+    }
     let dataExport = JSON.stringify({
         boundaries: boundariesLayer.toGeoJSON(),
         plan: planLayer.toGeoJSON(),
@@ -223,7 +236,7 @@ legend.onAdd = function(map) {
 legend.addTo(map);
 
 var drawingLegend = L.control({
-    position: 'topleft'
+    position: 'bottomleft'
 });
 drawingLegend.onAdd = function(map) {
     this._div = L.DomUtil.create('div', 'info legend');
