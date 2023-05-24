@@ -130,7 +130,7 @@ if (typeof esriAccessToken !== 'undefined') {
     addEsriBaseLayer("ArcGIS:Imagery", "Esri Imagery");
 }
 
-addOSMVectorLayer("osm_basic", "OSM Basic (offline)");
+addOSMVectorLayer("osm_basic", "OSM Basic");
 
 addSwisstopoBaseLayer("ch.swisstopo.pixelkarte-farbe", "Map of Switzerland");
 

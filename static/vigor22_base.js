@@ -52,19 +52,6 @@ var wmsTopPlusOpen = L.tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus
     attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2021, ' +
         '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
 }).addTo(map);
-var wmsTopPlusOpenGrey = L.tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus_open', {
-    layers: 'web_scale_grau',
-    maxZoom: 19,
-    attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2021, ' +
-        '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
-});
-var topPlusOpenOffline = L.tileLayer('/api/mbtiles/topplus_open/{z}/{x}/{y}.png', {
-    minZoom: 0,
-    maxNativeZoom: 16,
-    maxZoom: 19,
-    attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2022, ' +
-        '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
-});
 function addOSMVectorLayer(styleName, layerLabel) {
     let myLayer = L.maplibreGL({
         style: '../api/vector/style/' + styleName + '.json',
@@ -99,8 +86,6 @@ L.control.scale({
 }).addTo(map);
 var baseLayers = {
     "TopPlusOpen": wmsTopPlusOpen,
-    "<span style='color: gray'>TopPlusOpen (grey)</span>": wmsTopPlusOpenGrey,
-    "TopPlusOpen (offline)": topPlusOpenOffline,
 };
 var layerControl = L.control.layers(baseLayers, {}, {
     collapsed: L.Browser.mobile, // hide on mobile devices
@@ -109,5 +94,4 @@ var layerControl = L.control.layers(baseLayers, {}, {
 if (typeof esriAccessToken !== 'undefined') {
     addEsriBaseLayer("ArcGIS:Imagery", "Esri Imagery");
 }
-addOSMVectorLayer("osm_basic", "OSM Basic (offline)");
-addOSMVectorLayer("osm_bright", "OSM Bright (offline)");
+addOSMVectorLayer("osm_basic", "OSM Basic");
