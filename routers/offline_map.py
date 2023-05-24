@@ -22,13 +22,16 @@ def get_vector_metadata(region: str, request: Request):
         raise HTTPException(status_code=404, detail="Metadata not found.")
     if request.url.port is None:
         port_suffix = ""
+        # workaround for operation behind reverse proxy
+        scheme = "https"
     else:
         port_suffix = f":{request.url.port}"
+        scheme = request.url.scheme
     metadata = {
         "tilejson": "2.0.0",
         "scheme": "xyz",
         "tiles": [
-            f"{request.url.scheme}://{request.url.hostname}{port_suffix}"
+            f"{scheme}://{request.url.hostname}{port_suffix}"
             f"/api/vector/tiles/{region}/{{z}}/{{x}}/{{y}}.pbf"
         ],
     }
@@ -82,11 +85,13 @@ def get_vector_style(style_name: str, request: Request):
         )
     with open(style_file_name) as f:
         style = json.load(f)
-    scheme = request.url.scheme
     if request.url.port is None:
         port_suffix = ""
+        # workaround for operation behind reverse proxy
+        scheme = "https"
     else:
         port_suffix = f":{request.url.port}"
+        scheme = request.url.scheme
     if style.get("sprite") is not None:
         style["sprite"] = (
             f"{scheme}://{request.url.hostname}{port_suffix}"
