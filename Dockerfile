@@ -16,6 +16,7 @@ RUN apt-get update && \
 COPY ./static /code/static
 COPY ./*_style.json /code/
 COPY ./backend_fastapi.py /code/
+COPY ./routers /code/routers
 
 EXPOSE 80
 
