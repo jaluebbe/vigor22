@@ -14,7 +14,6 @@ RUN apt-get update && \
     apt -y autoremove
 
 COPY ./static /code/static
-COPY ./mbtiles.py /code/
 COPY ./*_style.json /code/
 COPY ./backend_fastapi.py /code/
 
