@@ -26,8 +26,9 @@ async def root():
     return RedirectResponse("/static/boundaries.html")
 
 
-@app.post("/api/convert_shape_files/")
-async def convert_shape_files(files: list[UploadFile], input_crs: str = Form()):
+def shape_file_conversion(
+    files: list[UploadFile], input_crs: str = "EPSG:4326"
+):
     shapefiles = [
         file.filename
         for file in files
@@ -46,11 +47,13 @@ async def convert_shape_files(files: list[UploadFile], input_crs: str = Form()):
         file_path = os.path.join(dir_name, file_name)
         if file_name.lower().endswith(".zip"):
             with zipfile.ZipFile(file_path) as z:
+                print([_file.filename for _file in z.filelist])
                 shp_in_zip = [
                     _file.filename
                     for _file in z.filelist
                     if _file.filename.lower().endswith(".shp")
                     and not _file.filename.startswith("__MACOSX/")
+                    and not _file.filename.startswith("Rx/")
                 ]
             if len(shp_in_zip) > 1:
                 raise HTTPException(status_code=500, detail="Too many files.")
@@ -70,6 +73,42 @@ async def convert_shape_files(files: list[UploadFile], input_crs: str = Form()):
             "input_crs": input_crs,
             "original_crs": original_crs,
         }
+
+
+@app.post("/api/convert_shape_files/")
+async def convert_shape_files(files: list[UploadFile], input_crs: str = Form()):
+    return shape_file_conversion(files, input_crs)
+
+
+@app.post("/api/convert_plan_shape_files/")
+async def convert_plan_shape_files(files: list[UploadFile]):
+    result = shape_file_conversion(files)
+    all_properties = [
+        _feature["properties"] for _feature in result["geojson"]["features"]
+    ]
+    known_rate_keys = set(all_properties[0].keys()).intersection(
+        ["RATE", "Menge", "rate"]
+    )
+    # unit_keys: "Unit", "Einheit"
+    print(known_rate_keys)
+    print(set(all_properties[0].keys()))
+    if len(known_rate_keys) == 1:
+        rate_key = known_rate_keys.pop()
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"No unique rate key found."
+        )
+    rate_values = [
+        _property[rate_key]
+        for _property in all_properties
+        if _property[rate_key] > 0
+    ]
+    result["min_rate"] = min(rate_values)
+    max_rate = max(rate_values)
+    result["max_rate"] = max_rate
+    for _property in all_properties:
+        _property["V22RATE"] = _property[rate_key] / max_rate
+    return result
 
 
 if __name__ == "__main__":
