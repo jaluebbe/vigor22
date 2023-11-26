@@ -142,7 +142,7 @@ function importShapes() {
         shapeInputForm.fileInput.value = "";
         updateConfigMenu();
     }
-    xhr.open('POST', '/api/convert_shape_files/');
+    xhr.open('POST', '/api/convert_plan_shape_files/');
     xhr.send(formData);
 }
 
