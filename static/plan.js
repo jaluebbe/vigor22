@@ -126,7 +126,11 @@ function importShapes() {
     formData.append('input_crs', shapeInputForm.inputCrs.value);
     const xhr = new XMLHttpRequest();
     xhr.onload = () => {
-        planLayer.clearLayers();
+        if (shapeInputForm.appendShapes.checked) {
+            shapeInputForm.appendShapes.checked = false;
+        } else {
+            planLayer.clearLayers();
+        }
         if (xhr.status != 200) {
             if (xhr.responseText == 'Internal Server Error') {
                 alert(xhr.responseText);
