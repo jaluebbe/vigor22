@@ -126,6 +126,10 @@ if (typeof esriAccessToken !== 'undefined') {
 var osmBasic = addOSMVectorLayer("osm_basic", "OSM Basic");
 var basemapDe = addBasemapDEVectorLayer("basemap.de");
 var swisstopoLight = addSwisstopoVectorLayer("swisstopo");
+wmsTopPlusOpen.addTo(map);
+/*
+// The following would allow to choose the map depending on the time zone of
+// the end user device.
 let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 if (timeZone == "Europe/Berlin") {
     basemapDe.addTo(map);
@@ -134,3 +138,4 @@ if (timeZone == "Europe/Berlin") {
 } else {
     osmBasic.addTo(map);
 }
+*/
