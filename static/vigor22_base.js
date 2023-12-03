@@ -28,7 +28,7 @@ function storeMapView() {
 }
 
 function setDefaultPosition() {
-    map.setView([47.315, 8.205], 9);
+    map.setView([47.654, 9.176], 9);
 }
 
 function restoreMapView() {
@@ -51,11 +51,40 @@ var wmsTopPlusOpen = L.tileLayer.wms('https://sgx.geodatenzentrum.de/wms_topplus
     maxZoom: 19,
     attribution: '&copy <a href="https://www.bkg.bund.de">BKG</a> 2021, ' +
         '<a href= "http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf" >data sources</a> '
-}).addTo(map);
+});
 function addOSMVectorLayer(styleName, layerLabel) {
     let myLayer = L.maplibreGL({
         style: '../api/vector/style/' + styleName + '.json',
         attribution: '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    });
+    layerControl.addBaseLayer(myLayer, layerLabel);
+    // make sure to reprint the vector map after being selected.
+    map.on('baselayerchange', function(eo) {
+        if (eo.name === layerLabel) {
+            myLayer._update();
+        }
+    });
+    return myLayer;
+};
+function addBasemapDEVectorLayer(layerLabel) {
+    let myLayer = L.maplibreGL({
+        style: 'https://sgx.geodatenzentrum.de/gdz_basemapde_vektor/styles/bm_web_top.json',
+        attribution: '&copy; GeoBasis-DE / <a href="https://www.bkg.bund.de">BKG</a> 2023, ' +
+        '<a href= "https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>',
+    });
+    layerControl.addBaseLayer(myLayer, layerLabel);
+    // make sure to reprint the vector map after being selected.
+    map.on('baselayerchange', function(eo) {
+        if (eo.name === layerLabel) {
+            myLayer._update();
+        }
+    });
+    return myLayer;
+};
+function addSwisstopoVectorLayer(layerLabel) {
+    let myLayer = L.maplibreGL({
+        style: 'https://vectortiles.geo.admin.ch/styles/ch.swisstopo.leichte-basiskarte.vt/style.json',
+        attribution: '&copy; <a href="https://www.swisstopo.admin.ch">swisstopo</a>',
     });
     layerControl.addBaseLayer(myLayer, layerLabel);
     // make sure to reprint the vector map after being selected.
@@ -94,4 +123,14 @@ var layerControl = L.control.layers(baseLayers, {}, {
 if (typeof esriAccessToken !== 'undefined') {
     addEsriBaseLayer("ArcGIS:Imagery", "Esri Imagery");
 }
-addOSMVectorLayer("osm_basic", "OSM Basic");
+var osmBasic = addOSMVectorLayer("osm_basic", "OSM Basic");
+var basemapDe = addBasemapDEVectorLayer("basemap.de");
+var swisstopoLight = addSwisstopoVectorLayer("swisstopo");
+let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+if (timeZone == "Europe/Berlin") {
+    basemapDe.addTo(map);
+} else if (timeZone == "Europe/Zurich") {
+    swisstopoLight.addTo(map);
+} else {
+    osmBasic.addTo(map);
+}
