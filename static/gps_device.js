@@ -24,4 +24,3 @@ function resetGPSConnection() {
     connectGPS();
     noSleep.enable();
 };
-
