@@ -132,7 +132,7 @@ function importShapes(files) {
         setTotalArea(boundariesArea);
         settings.throwing_range = 15;
         settings.min_speed = 1;
-        settings.default_rate = 0;
+        settings.default_speed = 2.22;
     }
     xhr.open('POST', '/api/convert_plan_shape_files/');
     xhr.send(formData);
@@ -210,15 +210,15 @@ info.onAdd = function(map) {
     this._div.innerHTML =
         '<div class="grid-container">' +
         '<div><span id="infoText">no GPS data</span></div>' +
-        '<div><span id="infoSpeedKm">0</span>&nbsp;km/h</div>' +
-        '<div><span id="infoSpeed">0</span>&nbsp;m/s</div>' +
+        '<div class="two-columns">' +
+        '<div>Actual</div><div><span id="infoSpeedKm">0</span>&nbsp;km/h</div>' +
+        '<div>Target</div><div><span id="infoSpeedKmTarget"></span></div></div>' +
         '<div><img src="agricultural-fertilizer-icon.svg" height="12px">&nbsp;<span id="infoRate">0</span>%</div>'
     '</div>';
     return this._div;
 };
 
 function updateSpeed(speed) {
-    infoSpeed.innerHTML = speed.toFixed(1);
     infoSpeedKm.innerHTML = (speed * 3.6).toFixed(1);
 };
 
@@ -228,6 +228,12 @@ function updateText(text) {
 
 function setRightRate(rate) {
     infoRate.innerHTML = (rate * 1e2).toFixed(0);
+    if (rate >= 0.4) {
+        let targetSpeed = settings.default_speed / rate;
+        infoSpeedKmTarget.innerHTML = (targetSpeed * 3.6).toFixed(1) + "&nbsp;km/h";
+    } else {
+        infoSpeedKmTarget.innerHTML = "CLOSE";
+    }
 };
 
 info.addTo(map);
@@ -398,16 +404,9 @@ function onLocationFound(e) {
                 outerRightPoint.geometry.coordinates.slice().reverse()
             ]
         ]);
-        let centerInBounds = false;
-        turf.featureEach(boundariesLayer.toGeoJSON(), function(feature, featureIndex) {
-            centerInBounds = centerInBounds || turf.booleanPointInPolygon(centerPoint, feature);
-        });
-        let rightInBounds = centerInBounds;
         let newRightRate = 0;
-        if (rightInBounds)
-            newRightRate = settings.default_rate;
         turf.featureEach(planLayer.toGeoJSON(), function(feature, featureIndex) {
-            if (rightInBounds && turf.booleanPointInPolygon(centerPoint, feature)) {
+            if (turf.booleanPointInPolygon(centerPoint, feature)) {
                 if (typeof feature.properties.V22RATE !== "undefined") {
                     newRightRate = feature.properties.V22RATE;
                 }
