@@ -144,7 +144,7 @@
         }
 
         function connect() {
-            ws = new WebSocket(ws_protocol + "//" + window.location.host + "/ws/vigor22_output");
+            ws = new WebSocket(ws_protocol + "//" + window.location.host + "/ws/vigor22");
             displayConnectionStatus();
             ws.onopen = function(event) {
                 displayConnectionStatus();
