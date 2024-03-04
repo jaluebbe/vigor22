@@ -1,0 +1,25 @@
+var map = L.map('map', {
+    minZoom: 0,
+    maxZoom: 19,
+    attributionControl: false
+});
+map.setView([49.0, 9.0], 7);
+function addOSMVectorLayer(styleName, layerLabel) {
+    let myLayer = L.maplibreGL({
+        style: styleName + '.json',
+        attribution: '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    });
+    layerControl.addBaseLayer(myLayer, layerLabel);
+    // make sure to reprint the vector map after being selected.
+    map.on('baselayerchange', function(eo) {
+        if (eo.name === layerLabel) {
+            myLayer._update();
+        }
+    });
+    return myLayer;
+};
+var layerControl = L.control.layers({}, {}, {
+    collapsed: true,
+    position: 'topright'
+}).addTo(map);
+addOSMVectorLayer("/api/vector/style/osm_basic", "OSM Basic").addTo(map);
