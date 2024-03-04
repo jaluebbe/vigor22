@@ -8,3 +8,5 @@ dependencies:
     - uvicorn
     - python-multipart
     - owslib
+    - point-in-geojson-jaluebbe
+    - smbus2
