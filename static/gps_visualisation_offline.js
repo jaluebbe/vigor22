@@ -1,6 +1,8 @@
 var map = L.map('map', {
     minZoom: 0,
     maxZoom: 19,
+    zoomSnap: 0.5,
+    zoomDelta: 0.5,
     attributionControl: false
 });
 map.setView([49.0, 9.0], 7);
