@@ -10,3 +10,4 @@ dependencies:
     - owslib
     - point-in-geojson-jaluebbe
     - smbus2
+    - orjson
