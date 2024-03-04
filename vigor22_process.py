@@ -350,10 +350,7 @@ class Vigor22Control:
 
     def write_data(self):
         self.project["protocol"] = self.protocol.to_dict()
-        _folder = self.project_path.parent / "test"
-        _folder.mkdir(exist_ok=True)
-        _path = _folder / self.project_path.name
-        _path.write_bytes(orjson.dumps(self.project))
+        self.project_path.write_bytes(orjson.dumps(self.project))
 
 
 def load_project_file() -> Vigor22Control | None:
