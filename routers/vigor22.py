@@ -24,6 +24,14 @@ async def websocket_endpoint(websocket: WebSocket):
     )
 
 
+@router.websocket("/ws/gps")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    await redis_connector(
+        websocket, source_channel="gps", target_channel="client_feedback"
+    )
+
+
 @router.get("/api/vigor22/available_projects")
 async def get_available_projects():
     projects = [
