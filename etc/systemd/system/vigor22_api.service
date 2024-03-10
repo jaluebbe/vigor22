@@ -6,8 +6,8 @@ After=redis-server.service
 Type=simple
 User=gpstracker
 Restart=on-failure
-ExecStart=/home/gpstracker/vigor22/backend_raspi.py
 WorkingDirectory=/home/gpstracker/vigor22
+ExecStart=/home/gpstracker/vigor22/backend_raspi.py
 
 [Install]
 WantedBy=multi-user.target
