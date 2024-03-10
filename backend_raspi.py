@@ -13,7 +13,7 @@ import routers.vigor22
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-if Path("../fonts").is_dir():
+if Path("fonts").is_dir():
     app.mount("/fonts", StaticFiles(directory="fonts"), name="fonts")
 log_directory = Path("../logs_json")
 if not log_directory.is_dir():
