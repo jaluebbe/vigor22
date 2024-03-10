@@ -1,0 +1,12 @@
+[Unit]
+Description=GPSD poller
+After=redis-server.service
+
+[Service]
+Type=simple
+User=gpstracker
+Restart=on-failure
+ExecStart=/home/gpstracker/vigor22/gps_poller.py
+
+[Install]
+WantedBy=multi-user.target

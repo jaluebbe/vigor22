@@ -1,0 +1,13 @@
+[Unit]
+Description=Host an API to access Vigor22 data
+After=redis-server.service
+
+[Service]
+Type=simple
+User=gpstracker
+Restart=on-failure
+ExecStart=/home/gpstracker/vigor22/backend_raspi.py
+WorkingDirectory=/home/gpstracker/vigor22
+
+[Install]
+WantedBy=multi-user.target
