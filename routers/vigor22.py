@@ -62,12 +62,34 @@ async def set_project(project_name: str):
     return project_name
 
 
+async def unset_project(project_name: str | None = None):
+    redis_connection = aioredis.Redis(host=redis_host, decode_responses=True)
+    active_project = await redis_connection.get("project_file")
+    if active_project is None:
+        return project_name
+    if project_name is not None:
+        file_path = project_directory / f"{project_name}.json"
+        if active_project != file_path.name:
+            return
+    await redis_connection.delete("project_file")
+    await redis_connection.publish(
+        "vigor22_control", orjson.dumps({"info": "project_changed"})
+    )
+    return project_name
+
+
+@router.get("/api/vigor22/deactivate_project")
+async def deactivate_project(project_name: str | None = None):
+    return await unset_project(project_name)
+
+
 @router.get("/api/vigor22/delete_project")
 async def delete_project(project_name: str):
     file_path = project_directory / f"{project_name}.json"
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="project file not found.")
     file_path.unlink()
+    await unset_project(project_name)
     return project_name
 
 
@@ -80,7 +102,10 @@ async def upload_projects(files: list[UploadFile]):
                 status_code=400, detail=f"{file.filename} is not a JSON file."
             )
         _data = orjson.loads(file.file.read())
-        if not {"boundaries", "plan", "settings"}.issubset(_data.keys()):
+        if not (
+            isinstance(_data, dict)
+            and {"boundaries", "plan", "settings"}.issubset(_data.keys())
+        ):
             raise HTTPException(
                 status_code=400,
                 detail=f"{file.filename} is not a valid project file.",
