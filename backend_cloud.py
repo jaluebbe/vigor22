@@ -2,6 +2,7 @@
 import tempfile
 import os
 import re
+import pathlib
 import zipfile
 from fastapi import FastAPI, Form, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -16,7 +17,8 @@ epsg_pattern = re.compile("^(?:EPSG|epsg):[0-9]{4,5}$")
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/fonts", StaticFiles(directory="fonts"), name="fonts")
+if pathlib.Path("fonts").is_dir():
+    app.mount("/fonts", StaticFiles(directory="fonts"), name="fonts")
 
 app.include_router(offline_map.router)
 
