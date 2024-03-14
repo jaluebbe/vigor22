@@ -9,6 +9,38 @@ import orjson
 import redis
 import point_in_geojson as pig
 
+dump_ignore_keys = [
+    "mode",
+    "time",
+    "pos_error",
+    "epc",
+    "eps",
+    "epd",
+    "epx",
+    "epy",
+    "epv",
+    "ept",
+    "tag",
+    "device",
+    "class",
+    "leapseconds",
+    "ecefx",
+    "ecefy",
+    "ecefz",
+    "ecefvx",
+    "ecefvy",
+    "ecefvz",
+    "ecefpAcc",
+    "ecefvAcc",
+    "eph",
+    "sep",
+    "velN",
+    "velE",
+    "velD",
+    "sensor",
+    "hostname",
+]
+
 
 class Vigor22Control:
     def __init__(self, project_path: pathlib.Path):
@@ -377,13 +409,20 @@ if __name__ == "__main__":
             continue
         if item["channel"] == "gps":
             data = orjson.loads(item["data"])
-            if data.get("sensor") == "gps":
-                # Log non-test data only.
-                # TODO: implementation
-                pass
             if vc is not None:
                 vc.update(data)
                 vc.send_output()
+                # Log non-test data in 50m radius around the project only.
+                if (
+                    data.get("sensor") == "gps"
+                    and vc.boundaries.closest_distance(*vc.location) < 50
+                ):
+                    key = "tracking:vigor22:{}".format(
+                        time.strftime("%Y%m%d", time.gmtime())
+                    )
+                    for key in dump_ignore_keys:
+                        data.pop(key, None)
+                    redis_connection.lpush(key, orjson.dumps(data))
         elif item["channel"] == "vigor22_control":
             data = orjson.loads(item["data"])
             if data.get("info") == "project_changed":
