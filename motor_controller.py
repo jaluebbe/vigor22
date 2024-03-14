@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!venv/bin/python3
 import time
 import orjson
 import redis
@@ -34,6 +34,6 @@ while True:
         _new_right_rate = int(float(data["right_rate"]) * 100)
         MotorAPI.set_ref(_new_left_rate, _new_right_rate)
         _status_message["set_position"] = [_new_left_rate, _new_right_rate]
-    redis_connection.publish("motor_status", json.dumps(_status_message))
+    redis_connection.publish("motor_status", orjson.dumps(_status_message))
     dt = time.time() - _timestamp
     time.sleep(max(0, interval - dt))
