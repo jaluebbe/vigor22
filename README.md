@@ -49,10 +49,7 @@ sudo apt upgrade -y
 sudo apt dist-upgrade -y
 sudo apt autoremove -y
 sudo apt install chrony gpsd git redis-server python3-pip python3-venv \
-hostapd dnsmasq anacron iptables -y
-#python3-gps \
-#python3-scipy python3-smbus python3-h5py
-
+hostapd dnsmasq anacron iptables python3-requests -y
 sudo systemctl unmask hostapd
 sudo systemctl disable hostapd
 sudo systemctl disable dnsmasq
@@ -123,12 +120,8 @@ git clone https://github.com/klokantech/klokantech-gl-fonts fonts
 ln -s ../osm_offline.mbtiles osm_offline.mbtiles
 python -m venv venv
 source venv/bin/activate
-pip install orjson redis smbus2 geojson point-in-geojson-jaluebbe uvicorn fastapi websockets python-multipart
+pip install -r requirements_raspi.txt
 ```
-
-
-
-
 
 ### Test Python scripts
 You are already in the vigor22 folder where you could perform some tests.

@@ -1,0 +1,9 @@
+orjson
+redis
+smbus2
+geojson
+uvicorn
+fastapi
+websockets
+python-multipart
+point-in-geojson-jaluebbe
