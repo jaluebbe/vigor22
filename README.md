@@ -16,20 +16,6 @@ Install fonts required for vector tiles:
 
 git clone https://github.com/klokantech/klokantech-gl-fonts fonts
 
-### Prepare OpenStreetMap offline data
-```
-docker run -e JAVA_TOOL_OPTIONS="-Xmx10g" -v "$(pwd)/data":/data ghcr.io/onthegomap/planetiler:latest --download --area=europe
-```
-You need Docker. Do not try this on a Raspberry Pi. It may take more than a day to create
-the output.mbtiles even on a powerful machine. You may choose another or a
-smaller region (e.g. "germany" or "dach" to include Austria, Germany and Switzerland).
-For more information see the
-[planetiler documentation](https://github.com/onthegomap/planetiler).
-Finally, copy the output.mbtiles to the following location on your Raspberry Pi:
-```
-/home/gpstracker/osm_offline.mbtiles
-```
-
 ## Raspberry Pi setup
 This installation procedure is partly identical to that of https://github.com/jaluebbe/GPSTracker .
 The focus of GPSTracker is on the readout of multiple sensors while this repository focuses on basic GPS data and motor control.
@@ -121,6 +107,20 @@ ln -s ../osm_offline.mbtiles osm_offline.mbtiles
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements_raspi.txt
+```
+
+### Prepare OpenStreetMap offline data
+```
+docker run -e JAVA_TOOL_OPTIONS="-Xmx10g" -v "$(pwd)/data":/data ghcr.io/onthegomap/planetiler:latest --download --area=europe
+```
+You need Docker. Do not try this on a Raspberry Pi. It may take more than a day to create
+the output.mbtiles even on a powerful machine. You may choose another or a
+smaller region (e.g. "germany" or "dach" to include Austria, Germany and Switzerland).
+For more information see the
+[planetiler documentation](https://github.com/onthegomap/planetiler).
+Finally, copy the output.mbtiles to the following location on your Raspberry Pi:
+```
+/home/gpstracker/osm_offline.mbtiles
 ```
 
 ### Test Python scripts
