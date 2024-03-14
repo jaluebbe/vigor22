@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>Work - Vigor 22</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="leaflet/leaflet.css">
+    <link rel="stylesheet" href="maplibre-gl/maplibre-gl.css">
+    <style>
+        #map {
+            position: fixed;
+            height: calc(100% - 50px);
+            width: 100%;
+            min-height: 285px;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .navbar {
+            overflow: hidden;
+            background-color: #333;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 17px;
+        }
+
+        .navbar a:hover {
+            background: #f1f1f1;
+            color: black;
+        }
+
+        .navbar a.active {
+            background-color: #04AA6D;
+            color: white;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: auto auto;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+
+        .tooltip-grid-container {
+            display: grid;
+            grid-template-columns: auto auto;
+            column-gap: 5px;
+        }
+
+        #statusLight {
+            background-color: #e7b416;
+            border-radius: 9999px;
+            height: 0.75rem;
+            width: 0.75rem;
+            margin-right: 0.5rem;
+        }
+
+        #statusLabel {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div class="navbar">
+        <a href="./setup.html">Setup</a>
+        <a href="./map.html">Map</a>
+        <a href="./work.html" class="active">Work</a>
+    </div>
+
+    <script src="leaflet/leaflet.js"></script>
+    <script src="turf.min.js"></script>
+    <script src="maplibre-gl/maplibre-gl.js"></script>
+    <script src="maplibre-gl/leaflet-maplibre-gl.js"></script>
+    <script src="no_sleep.min.js"></script>
+    <script src="gps_visualisation_offline.js"></script>
+    <script src="vigor22_map_shared.js"></script>
+    <script src="vigor22_work.js"></script>
+    <script>
+        const statusColors = ["#e7b416", "#2dc937", "#db7b2b", "#cc3232"];
+        const statusLabels = ["connecting", "connected", "disconnecting", "disconnected"];
+        var noSleep = new NoSleep();
+        var ws = undefined;
+        var ws_protocol = undefined;
+        if (window.location.protocol == "https:") {
+            ws_protocol = "wss:"
+        } else {
+            ws_protocol = "ws:"
+        }
+        var lastMessageUtc = undefined;
+
+        function displayConnectionStatus() {
+            statusLight.style["background-color"] = statusColors[ws.readyState];
+            statusLabel.innerHTML = statusLabels[ws.readyState];
+        };
+
+        function processMessage(message) {
+            if (message.type == "location") {
+                let location = L.latLng(message.latitude, message.longitude);
+                message.latlng = location;
+                onLocationFound(message);
+            } else if (message.type == "protocol_feature") {
+                protocolLayer.addData(message.feature);
+            } else if (message.type == "boundaries") {
+                setBoundaries(message.feature_collection);
+            } else if (message.type == "plan") {
+                setPlan(message.feature_collection);
+            } else if (message.type == "protocol") {
+                setProtocol(message.feature_collection);
+            } else if (message.type == "ping") {} else {
+                return
+            }
+            lastMessageUtc = message.utc;
+        }
+
+        function connect() {
+            ws = new WebSocket(ws_protocol + "//" + window.location.host + "/ws/vigor22");
+            displayConnectionStatus();
+            ws.onopen = function(event) {
+                displayConnectionStatus();
+                ws.send(JSON.stringify({
+                    info: "project_requested"
+                }));
+            };
+            ws.onclose = function(event) {
+                displayConnectionStatus();
+            };
+            ws.onmessage = function(event) {
+                let message = JSON.parse(event.data);
+                processMessage(message)
+
+            };
+        };
+
+        function checkConnection() {
+            const utcNow = Date.now() / 1e3;
+            if (lastMessageUtc != null && utcNow - lastMessageUtc > 30) {
+                ws.onclose = null;
+                ws.onmessage = null;
+                ws.close(1000);
+                connect();
+            }
+        }
+
+        connect();
+
+        onfocus = (event) => {
+            if (ws.readyState == ws.OPEN) {
+                ws.send(JSON.stringify({
+                    type: "ping"
+                }));
+                setTimeout(function() {
+                    checkConnection();
+                }, 2000)
+            } else {
+                checkConnection()
+            }
+        };
+
+        document.addEventListener('click', function enableNoSleep() {
+            document.removeEventListener('click', enableNoSleep, false);
+            noSleep.enable();
+        }, false);
+    </script>
+
+</body>
+
+</html>

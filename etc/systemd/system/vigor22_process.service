@@ -1,0 +1,13 @@
+[Unit]
+Description=Vigor22 main process
+After=redis-server.service
+
+[Service]
+Type=simple
+User=gpstracker
+Restart=on-failure
+WorkingDirectory=/home/gpstracker/vigor22
+ExecStart=/home/gpstracker/vigor22/vigor22_process.py
+
+[Install]
+WantedBy=multi-user.target

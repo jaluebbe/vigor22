@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>Setup - Vigor 22</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        #content {
+            position: fixed;
+            height: calc(100% - 50px);
+            width: 100%;
+            min-height: 285px;
+            margin: 10px;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .navbar {
+            overflow: hidden;
+            background-color: #333;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 17px;
+        }
+
+        .navbar a:hover {
+            background: #f1f1f1;
+            color: black;
+        }
+
+        .navbar a.active {
+            background-color: #04AA6D;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <h1>Setup</h1>
+        <p>Project upload
+            <input id="fileInput" name="fileInput" type="file" multiple>
+        </p>
+        <p>Active project:&nbsp;<span id="activeProject">None</span></p>
+        <p>Available projects:
+            <select id="projectSelect"></select>
+        </p>
+        <p>
+            <button onclick="activateProject(projectSelect.value);" id="activateButton" name="activateButton">Activate</button>
+            <button onclick="deactivateProject();" id="deactivateButton" name="deactivateButton">Deactivate</button>
+            <button onclick="downloadProject(projectSelect.value);" id="downloadButton" name="downloadButton">Download</button>
+            <button onclick="deleteProject(projectSelect.value);" id="deleteButton" name="deleteButton">Delete</button>
+        </p>
+    </div>
+    <div class="navbar">
+        <a href="./setup.html" class="active">Setup</a>
+        <a href="./map.html">Map</a>
+        <a href="./work.html">Work</a>
+    </div>
+    <script src="vigor22_setup.js"></script>
+</body>
+
+</html>
