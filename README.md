@@ -10,7 +10,7 @@ To run the cloud API as a single process:
 
 python backend_cloud.py
 
-### If you want to use self-hosted OpenStreetMap data, you need to set up fonts and OSM vector data:
+If you want to use self-hosted OpenStreetMap data, you need to set up fonts and OSM vector data.
 
 Install fonts required for vector tiles:
 
