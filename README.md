@@ -108,6 +108,14 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements_raspi.txt
 ```
+Check your Python version by calling:
+```
+python --version
+```
+If your version is below 3.10 call:
+```
+pip install eval_type_backport
+```
 
 ### Prepare OpenStreetMap offline data
 ```
