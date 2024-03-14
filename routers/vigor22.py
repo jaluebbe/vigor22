@@ -36,7 +36,8 @@ async def websocket_endpoint(websocket: WebSocket):
 @router.get("/api/vigor22/available_projects")
 async def get_available_projects():
     projects = [
-        _file.name.rstrip(".json") for _file in project_directory.glob("*.json")
+        _file.name.split(".json")[0]
+        for _file in project_directory.glob("*.json")
     ]
     return projects
 
