@@ -1,0 +1,2 @@
+#!/bin/bash
+python3 /home/gpstracker/vigor22/archive_data.py
