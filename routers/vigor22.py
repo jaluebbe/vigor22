@@ -48,7 +48,7 @@ async def get_project():
     current_project = await redis_connection.get("project_file")
     if current_project is None:
         raise HTTPException(status_code=404, detail="no active project.")
-    return current_project.rstrip(".json")
+    return current_project.split(".json")[0]
 
 
 @router.get("/api/vigor22/set_project")
@@ -118,5 +118,5 @@ async def upload_projects(files: list[UploadFile]):
                 status_code=409, detail=f"{file.filename} already exists."
             )
         target_path.write_bytes(orjson.dumps(_data))
-        project_files.append(target_path.name.rstrip(".json"))
+        project_files.append(target_path.name.split(".json")[0])
     return project_files
