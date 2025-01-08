@@ -420,8 +420,8 @@ if __name__ == "__main__":
                     key = "tracking:vigor22:{}".format(
                         time.strftime("%Y%m%d", time.gmtime())
                     )
-                    for key in dump_ignore_keys:
-                        data.pop(key, None)
+                    for ignored_key in dump_ignore_keys:
+                        data.pop(ignored_key, None)
                     redis_connection.lpush(key, orjson.dumps(data))
         elif item["channel"] == "vigor22_control":
             data = orjson.loads(item["data"])
