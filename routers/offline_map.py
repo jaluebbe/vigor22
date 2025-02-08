@@ -1,7 +1,7 @@
-import os
 import sqlite3
 import json
 from fastapi import APIRouter, HTTPException, Request, Response
+from pathlib import Path
 
 router = APIRouter()
 
@@ -9,24 +9,19 @@ router = APIRouter()
 @router.get("/api/vector/metadata/{region}.json")
 def get_vector_metadata(region: str, request: Request):
     db_file_name = f"{region}.mbtiles"
-    if not os.path.isfile(db_file_name):
+    if not Path(db_file_name).is_file():
         raise HTTPException(
             status_code=404, detail=f"Region '{region}' not found."
         )
-    db_connection = sqlite3.connect(f"file:{db_file_name}?mode=ro", uri=True)
-    cursor = db_connection.execute("SELECT * FROM metadata")
-    result = cursor.fetchall()
-    cursor.close()
-    db_connection.close()
+    with sqlite3.connect(
+        f"file:{db_file_name}?mode=ro", uri=True
+    ) as db_connection:
+        cursor = db_connection.execute("SELECT * FROM metadata")
+        result = cursor.fetchall()
     if result is None:
         raise HTTPException(status_code=404, detail="Metadata not found.")
-    if request.url.port is None:
-        port_suffix = ""
-        # workaround for operation behind reverse proxy
-        scheme = "https"
-    else:
-        port_suffix = f":{request.url.port}"
-        scheme = request.url.scheme
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    port_suffix = f":{request.url.port}" if request.url.port else ""
     metadata = {
         "tilejson": "2.0.0",
         "scheme": "xyz",
@@ -52,21 +47,21 @@ def get_vector_metadata(region: str, request: Request):
 @router.get("/api/vector/tiles/{region}/{zoom_level}/{x}/{y}.pbf")
 def get_vector_tiles(region: str, zoom_level: int, x: int, y: int):
     tile_column = x
-    tile_row = 2**zoom_level - 1 - y
+    tile_row = 2 ** zoom_level - 1 - y
     db_file_name = f"{region}.mbtiles"
-    if not os.path.isfile(db_file_name):
+    if not Path(db_file_name).is_file():
         raise HTTPException(
             status_code=404, detail=f"Region '{region}' not found."
         )
-    db_connection = sqlite3.connect(f"file:{db_file_name}?mode=ro", uri=True)
-    cursor = db_connection.execute(
-        "SELECT tile_data FROM tiles "
-        "WHERE zoom_level = ? and tile_column = ? and tile_row = ?",
-        (zoom_level, tile_column, tile_row),
-    )
-    result = cursor.fetchone()
-    cursor.close()
-    db_connection.close()
+    with sqlite3.connect(
+        f"file:{db_file_name}?mode=ro", uri=True
+    ) as db_connection:
+        cursor = db_connection.execute(
+            "SELECT tile_data FROM tiles "
+            "WHERE zoom_level = ? and tile_column = ? and tile_row = ?",
+            (zoom_level, tile_column, tile_row),
+        )
+        result = cursor.fetchone()
     if result is None:
         raise HTTPException(status_code=404, detail="Tile not found.")
     return Response(
@@ -79,19 +74,14 @@ def get_vector_tiles(region: str, zoom_level: int, x: int, y: int):
 @router.get("/api/vector/style/{style_name}.json")
 def get_vector_style(style_name: str, request: Request):
     style_file_name = f"{style_name}_style.json"
-    if not os.path.isfile(style_file_name):
+    if not Path(style_file_name).is_file():
         raise HTTPException(
             status_code=404, detail=f"Style '{style_name}' not known."
         )
     with open(style_file_name) as f:
         style = json.load(f)
-    if request.url.port is None:
-        port_suffix = ""
-        # workaround for operation behind reverse proxy
-        scheme = "https"
-    else:
-        port_suffix = f":{request.url.port}"
-        scheme = request.url.scheme
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    port_suffix = f":{request.url.port}" if request.url.port else ""
     if style.get("sprite") is not None:
         style["sprite"] = (
             f"{scheme}://{request.url.hostname}{port_suffix}"
