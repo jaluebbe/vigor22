@@ -35,7 +35,7 @@ sudo apt upgrade -y
 sudo apt dist-upgrade -y
 sudo apt autoremove -y
 sudo apt install chrony gpsd git redis-server python3-pip python3-venv \
-hostapd dnsmasq anacron iptables python3-requests -y
+hostapd dnsmasq anacron iptables python3-requests iptables -y
 sudo systemctl unmask hostapd
 sudo systemctl disable hostapd
 sudo systemctl disable dnsmasq
@@ -103,7 +103,6 @@ sudo su - gpstracker  # or login as user gpstracker directly
 git clone https://github.com/jaluebbe/vigor22.git
 cd vigor22
 git clone https://github.com/klokantech/klokantech-gl-fonts fonts
-ln -s ../osm_offline.mbtiles osm_offline.mbtiles
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements_raspi.txt
