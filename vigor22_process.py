@@ -366,7 +366,7 @@ class Vigor22Control:
         self.location = (gps_data["lon"], gps_data["lat"])
         self.heading = gps_data.get("track")
         self.speed = gps_data.get("speed")
-        self.accuracy = gps_data["hdop"] * 15
+        self.accuracy = gps_data["hdop"] * 15 if "hdop" in gps_data else None
         if None in (self.heading, self.speed):
             self.indicator = []
         elif self.speed < self.min_speed:
