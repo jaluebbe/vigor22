@@ -107,6 +107,9 @@ async def upload_projects(files: list[UploadFile]):
         if not (
             isinstance(_data, dict)
             and {"boundaries", "plan", "settings"}.issubset(_data.keys())
+            and {"throwing_range", "min_speed", "default_rate"}.issubset(
+                _data["settings"].keys()
+            )
         ):
             raise HTTPException(
                 status_code=400,
