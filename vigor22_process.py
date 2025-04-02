@@ -63,6 +63,7 @@ class Vigor22Control:
         self.left_in_bounds = False
         self.right_in_bounds = False
         self.center_in_bounds = False
+        self.motor_state = None
         self.location = None
         self.heading = None
         self.speed = None
@@ -366,10 +367,10 @@ class Vigor22Control:
         self.location = (gps_data["lon"], gps_data["lat"])
         self.heading = gps_data.get("track")
         self.speed = gps_data.get("speed")
-        self.accuracy = gps_data["hdop"] * 15
+        self.accuracy = gps_data["hdop"] * 15 if "hdop" in gps_data else None
         if None in (self.heading, self.speed):
             self.indicator = []
-        elif self.speed < self.min_speed:
+        elif self.motor_state != "Automatik" or self.speed < self.min_speed:
             self.indicator = []
             self.close_left_shapes()
             self.close_right_shapes()
@@ -402,7 +403,7 @@ if __name__ == "__main__":
     vc = load_project_file()
     redis_connection = redis.Redis(decode_responses=True)
     _pubsub = redis_connection.pubsub()
-    _pubsub.subscribe("gps", "vigor22_control")
+    _pubsub.subscribe("gps", "vigor22_control", "motor_status")
 
     for item in _pubsub.listen():
         if not item["type"] == "message":
@@ -436,3 +437,7 @@ if __name__ == "__main__":
                     "vigor22_output",
                     orjson.dumps({"type": "pong", "utc": time.time()}),
                 )
+        elif item["channel"] == "motor_status":
+            data = orjson.loads(item["data"])
+            self.motor_state = data["state"]
+

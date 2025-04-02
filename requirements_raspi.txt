@@ -6,4 +6,4 @@ uvicorn
 fastapi
 websockets
 python-multipart
-point-in-geojson-jaluebbe
+point-in-geojson

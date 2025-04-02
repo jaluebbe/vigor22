@@ -6,8 +6,8 @@ After=redis-server.service
 Type=simple
 User=gpstracker
 Restart=on-failure
-WorkingDirectory=/home/gpstracker/vigor22
 ExecStart=/home/gpstracker/vigor22/gps_poller.py
+WorkingDirectory=/home/gpstracker/vigor22
 
 [Install]
 WantedBy=multi-user.target

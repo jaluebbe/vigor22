@@ -34,11 +34,8 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt dist-upgrade -y
 sudo apt autoremove -y
-sudo apt install chrony gpsd git redis-server python3-pip python3-venv \
-hostapd dnsmasq anacron iptables python3-requests -y
-sudo systemctl unmask hostapd
-sudo systemctl disable hostapd
-sudo systemctl disable dnsmasq
+sudo apt install chrony gpsd git redis-server python3-venv \
+anacron iptables python3-requests -y
 sudo useradd -m gpstracker
 sudo usermod -a -G i2c,video,gpio gpstracker
 sudo passwd gpstracker
@@ -103,7 +100,6 @@ sudo su - gpstracker  # or login as user gpstracker directly
 git clone https://github.com/jaluebbe/vigor22.git
 cd vigor22
 git clone https://github.com/klokantech/klokantech-gl-fonts fonts
-ln -s ../osm_offline.mbtiles osm_offline.mbtiles
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements_raspi.txt
@@ -184,12 +180,6 @@ sudo systemctl enable vigor22_api.service
 sudo cp /home/gpstracker/vigor22/etc/cron.daily/archive_data /etc/cron.daily/
 ```
 You may access the API via [ip or hostname]:8080/docs .
-
-If you would like to create a redirection from port 80 to port 8080,
-you should add the following line to /etc/rc.local :
-```
-/usr/sbin/iptables -A PREROUTING -t nat -i wlan0 -p tcp --dport 80 -j REDIRECT --to-port 8080
-```
 
 ### WiFi access point
 For WiFi access point setup look into the README of https://github.com/jaluebbe/GPSTracker
