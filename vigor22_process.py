@@ -437,7 +437,7 @@ if __name__ == "__main__":
                     "vigor22_output",
                     orjson.dumps({"type": "pong", "utc": time.time()}),
                 )
-        elif item["channel"] == "motor_status":
+        elif item["channel"] == "motor_status" and vc is not None:
             data = orjson.loads(item["data"])
-            self.motor_state = data["state"]
+            vc.motor_state = data["state"]
 
