@@ -22,11 +22,11 @@ def fixed_baudrate_set():
     return False
 
 
-def call_gpsctl(args, timeout=8):
+def call_gpsctl(args, timeout=12):
     try:
         cmd = ["gpsctl"] + args.split()
         subprocess.check_output(cmd, timeout=timeout)
-    except TimeoutExpired:
+    except subprocess.TimeoutExpired:
         logging.exception(f"The gpsctl command timed out.")
 
 
