@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>GPS position</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="leaflet/leaflet.css">
+    <link rel="stylesheet" href="maplibre-gl/maplibre-gl.css">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            min-height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            min-height: 285px;
+            height: 98%;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+
+        .grid-container {
+            display: grid;
+            column-gap: 5px;
+            row-gap: 5px;
+        }
+
+        #statusGPS {
+            align-items: center;
+            display: flex;
+        }
+
+        #statusLightGPS {
+            background-color: #e7b416;
+            border-radius: 9999px;
+            height: 0.75rem;
+            width: 0.75rem;
+            margin-right: 0.5rem;
+        }
+
+        #statusLabelGPS {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <template id="gpsControlTemplate">
+        <div class="grid-container">
+            <h4>GPS</h4>
+            <div id="statusGPS">
+                <div id="statusLightGPS"></div>
+                <div id="statusLabelGPS"></div>
+            </div>
+            <button onclick="disconnectGPS()">disconnect</button>
+            <button onclick="resetGPSConnection()">reset connection</button>
+        </div>
+    </template>
+    <script src="leaflet/leaflet.js"></script>
+    <script src="maplibre-gl/maplibre-gl.js"></script>
+    <script src="maplibre-gl/leaflet-maplibre-gl.js"></script>
+    <script src="gps_visualisation_offline.js"></script>
+    <script>
+        const statusColors = ["#e7b416", "#2dc937", "#db7b2b", "#cc3232"];
+        const statusLabels = ["connecting", "connected", "disconnecting", "disconnected"]
+        map.setZoom(15);
+        var myMarker = L.marker([], {
+            zIndexOffset: 1000
+        });
+        var myCircle = L.circle([], {
+            radius: 0
+        });
+        var legend = L.control({
+            position: 'topright'
+        });
+        legend.onAdd = function(map) {
+            this._div = L.DomUtil.create('div', 'info legend');
+            let tempSource = document.getElementById('gpsControlTemplate');
+            this._div.appendChild(tempSource.content.cloneNode(true));
+            L.DomEvent.disableClickPropagation(this._div);
+            return this._div;
+        }
+        legend.addTo(map);
+        var ws = undefined;
+
+        function connectGPS() {
+            ws = new WebSocket("ws://" + window.location.host + "/ws/gps");
+            displayStatusGPS();
+            ws.onopen = function(event) {
+                displayStatusGPS();
+            };
+            ws.onclose = function(event) {
+                displayStatusGPS();
+            };
+            ws.onmessage = function(event) {
+                let message = JSON.parse(event.data);
+                let location = L.latLng(message.lat, message.lon);
+                let error = message.hdop * 15;
+                myMarker.setLatLng(location);
+                myCircle.setLatLng(location);
+                if (isFinite(error))
+                    myCircle.setRadius(error);
+                if (!map.hasLayer(myMarker)) {
+                    myMarker.addTo(map);
+                    myCircle.addTo(map);
+                }
+                if (!map.getBounds().contains(location)) {
+                    map.setView(location);
+                }
+            };
+        };
+
+        function displayStatusGPS() {
+            statusLightGPS.style["background-color"] = statusColors[ws.readyState];
+            statusLabelGPS.innerHTML = statusLabels[ws.readyState];
+        };
+
+        function disconnectGPS() {
+            ws.close(1000);
+            ws.onmessage = null;
+        };
+
+        function resetGPSConnection() {
+            disconnectGPS();
+            connectGPS();
+        };
+
+        connectGPS();
+    </script>
+</body>
+
+</html>
