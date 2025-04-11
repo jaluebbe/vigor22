@@ -404,6 +404,8 @@ if __name__ == "__main__":
     redis_connection = redis.Redis(decode_responses=True)
     _pubsub = redis_connection.pubsub()
     _pubsub.subscribe("gps", "vigor22_control", "motor_status")
+    last_dump = None
+    track_log_interval = 5
 
     for item in _pubsub.listen():
         if not item["type"] == "message":
@@ -417,6 +419,10 @@ if __name__ == "__main__":
                 if (
                     data.get("sensor") == "gps"
                     and vc.boundaries.closest_distance(*vc.location) < 50
+                    and (
+                        last_dump is None
+                        or vc.utc > last_dump + track_log_interval
+                    )
                 ):
                     key = "tracking:vigor22:{}".format(
                         time.strftime("%Y%m%d", time.gmtime())
@@ -424,6 +430,7 @@ if __name__ == "__main__":
                     for ignored_key in dump_ignore_keys:
                         data.pop(ignored_key, None)
                     redis_connection.lpush(key, orjson.dumps(data))
+                    last_dump = vc.utc
         elif item["channel"] == "vigor22_control":
             data = orjson.loads(item["data"])
             if data.get("info") == "project_changed":
