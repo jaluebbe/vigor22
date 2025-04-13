@@ -395,7 +395,7 @@ def load_project_file() -> Vigor22Control | None:
     project_file = redis_connection.get("project_file")
     if project_file is not None:
         project_path = project_directory / project_file
-        if project_path.is_file():
+        if project_path.is_file() and project_path.stat().st_size > 0:
             return Vigor22Control(project_path)
 
 
