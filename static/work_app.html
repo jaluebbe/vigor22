@@ -168,13 +168,21 @@
             };
         };
 
+        function disconnectVigor() {
+            ws.onclose = null;
+            ws.onmessage = null;
+            ws.close(1000);
+        };
+
+        function resetVigorConnection() {
+            disconnectVigor();
+            connect();
+        };
+
         function checkConnection() {
             const utcNow = Date.now() / 1e3;
             if (lastMessageUtc != null && utcNow - lastMessageUtc > 30) {
-                ws.onclose = null;
-                ws.onmessage = null;
-                ws.close(1000);
-                connect();
+                resetVigorConnection()
             }
         }
 
