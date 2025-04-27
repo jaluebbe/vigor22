@@ -156,6 +156,11 @@
             };
             ws.onclose = function(event) {
                 displayConnectionStatus();
+                let statusMessage = "Socket is closed. Reconnect will be attempted in 5 seconds.";
+                console.log(statusMessage, e.reason);
+                setTimeout(function() {
+                    connect();
+                }, 5000);
             };
             ws.onmessage = function(event) {
                 let message = JSON.parse(event.data);
