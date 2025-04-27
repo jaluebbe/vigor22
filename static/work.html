@@ -189,6 +189,9 @@
 
         connect();
 
+        statusLight.onclick = resetVigorConnection;
+        statusLabel.onclick = resetVigorConnection;
+
         onfocus = (event) => {
             if (ws.readyState == ws.OPEN) {
                 ws.send(JSON.stringify({
