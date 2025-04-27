@@ -11,7 +11,7 @@ info.onAdd = function(map) {
     this._div = L.DomUtil.create('div', 'info');
     this._div.innerHTML =
         '<div class="grid-container">' +
-        '<div><span id="infoText">no connection</span></div>' +
+        '<div><span id="infoText"></span></div>' +
         '<div><span id="infoSpeedKm">0</span>&nbsp;km/h</div>' +
         '<div><span id="infoSpeed">0</span>&nbsp;m/s</div>' +
         '<div><img src="agricultural-fertilizer-icon.svg" height="12px">&nbsp;<span id="infoRate">0</span>%</div>'
