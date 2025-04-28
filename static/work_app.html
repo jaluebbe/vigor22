@@ -186,23 +186,27 @@
             }
         }
 
+        function pingAndCheckConnection() {
+            if (ws.readyState === ws.OPEN) {
+                ws.send(JSON.stringify({
+                    type: "ping"
+                }));
+                setTimeout(checkConnection, 2000);
+            } else {
+                checkConnection();
+            }
+        }
+
         connect();
 
         statusLight.onclick = resetVigorConnection;
         statusLabel.onclick = resetVigorConnection;
 
         onfocus = (event) => {
-            if (ws.readyState == ws.OPEN) {
-                ws.send(JSON.stringify({
-                    type: "ping"
-                }));
-                setTimeout(function() {
-                    checkConnection();
-                }, 2000)
-            } else {
-                checkConnection()
-            }
+            pingAndCheckConnection();
         };
+
+        setInterval(pingAndCheckConnection, 5000);
 
         document.addEventListener('click', function enableNoSleep() {
             document.removeEventListener('click', enableNoSleep, false);

@@ -156,11 +156,6 @@
             };
             ws.onclose = function(event) {
                 displayConnectionStatus();
-                let statusMessage = "Socket is closed. Reconnect will be attempted in 5 seconds.";
-                console.log(statusMessage, e.reason);
-                setTimeout(function() {
-                    connect();
-                }, 5000);
             };
             ws.onmessage = function(event) {
                 let message = JSON.parse(event.data);
@@ -182,8 +177,19 @@
 
         function checkConnection() {
             const utcNow = Date.now() / 1e3;
-            if (lastMessageUtc != null && utcNow - lastMessageUtc > 30) {
+            if (lastMessageUtc == null || utcNow - lastMessageUtc > 10) {
                 resetVigorConnection();
+            }
+        }
+
+        function pingAndCheckConnection() {
+            if (ws.readyState === ws.OPEN) {
+                ws.send(JSON.stringify({
+                    type: "ping"
+                }));
+                setTimeout(checkConnection, 2000);
+            } else {
+                checkConnection();
             }
         }
 
@@ -193,17 +199,10 @@
         statusLabel.onclick = resetVigorConnection;
 
         onfocus = (event) => {
-            if (ws.readyState == ws.OPEN) {
-                ws.send(JSON.stringify({
-                    type: "ping"
-                }));
-                setTimeout(function() {
-                    checkConnection();
-                }, 2000)
-            } else {
-                checkConnection()
-            }
+            pingAndCheckConnection();
         };
+
+        setInterval(pingAndCheckConnection, 5000);
 
         document.addEventListener('click', function enableNoSleep() {
             document.removeEventListener('click', enableNoSleep, false);
