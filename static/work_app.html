@@ -138,7 +138,7 @@
                 setPlan(message.feature_collection);
             } else if (message.type == "protocol") {
                 setProtocol(message.feature_collection);
-            } else if (message.type == "ping") {} else {
+            } else if (message.type == "pong") {} else {
                 return
             }
             lastMessageUtc = message.utc;
@@ -155,11 +155,6 @@
             };
             ws.onclose = function(event) {
                 displayConnectionStatus();
-                let statusMessage = "Socket is closed. Reconnect will be attempted in 5 seconds.";
-                console.log(statusMessage, e.reason);
-                setTimeout(function() {
-                    connect();
-                }, 5000);
             };
             ws.onmessage = function(event) {
                 let message = JSON.parse(event.data);
@@ -181,8 +176,8 @@
 
         function checkConnection() {
             const utcNow = Date.now() / 1e3;
-            if (lastMessageUtc != null && utcNow - lastMessageUtc > 30) {
-                resetVigorConnection()
+            if (lastMessageUtc == null || utcNow - lastMessageUtc > 5) {
+                resetVigorConnection();
             }
         }
 

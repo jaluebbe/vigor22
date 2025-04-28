@@ -139,7 +139,7 @@
                 setPlan(message.feature_collection);
             } else if (message.type == "protocol") {
                 setProtocol(message.feature_collection);
-            } else if (message.type == "ping") {} else {
+            } else if (message.type == "pong") {} else {
                 return
             }
             lastMessageUtc = message.utc;
@@ -177,7 +177,7 @@
 
         function checkConnection() {
             const utcNow = Date.now() / 1e3;
-            if (lastMessageUtc == null || utcNow - lastMessageUtc > 10) {
+            if (lastMessageUtc == null || utcNow - lastMessageUtc > 5) {
                 resetVigorConnection();
             }
         }
