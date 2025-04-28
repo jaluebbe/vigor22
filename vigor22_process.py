@@ -439,7 +439,7 @@ if __name__ == "__main__":
                 vc = load_project_file()
             elif data.get("info") == "project_requested" and vc is not None:
                 vc.publish_project()
-            elif data.get("info") == "ping":
+            elif data.get("type") == "ping":
                 redis_connection.publish(
                     "vigor22_output",
                     orjson.dumps({"type": "pong", "utc": time.time()}),

@@ -138,7 +138,7 @@
                 setPlan(message.feature_collection);
             } else if (message.type == "protocol") {
                 setProtocol(message.feature_collection);
-            } else if (message.type == "ping") {} else {
+            } else if (message.type == "pong") {} else {
                 return
             }
             lastMessageUtc = message.utc;
@@ -163,30 +163,45 @@
             };
         };
 
+        function disconnectVigor() {
+            ws.onclose = null;
+            ws.onmessage = null;
+            ws.close(1000);
+        };
+
+        function resetVigorConnection() {
+            disconnectVigor();
+            connect();
+        };
+
         function checkConnection() {
             const utcNow = Date.now() / 1e3;
-            if (lastMessageUtc != null && utcNow - lastMessageUtc > 30) {
-                ws.onclose = null;
-                ws.onmessage = null;
-                ws.close(1000);
-                connect();
+            if (lastMessageUtc == null || utcNow - lastMessageUtc > 5) {
+                resetVigorConnection();
+            }
+        }
+
+        function pingAndCheckConnection() {
+            if (ws.readyState === ws.OPEN) {
+                ws.send(JSON.stringify({
+                    type: "ping"
+                }));
+                setTimeout(checkConnection, 2000);
+            } else {
+                checkConnection();
             }
         }
 
         connect();
 
+        statusLight.onclick = resetVigorConnection;
+        statusLabel.onclick = resetVigorConnection;
+
         onfocus = (event) => {
-            if (ws.readyState == ws.OPEN) {
-                ws.send(JSON.stringify({
-                    type: "ping"
-                }));
-                setTimeout(function() {
-                    checkConnection();
-                }, 2000)
-            } else {
-                checkConnection()
-            }
+            pingAndCheckConnection();
         };
+
+        setInterval(pingAndCheckConnection, 5000);
 
         document.addEventListener('click', function enableNoSleep() {
             document.removeEventListener('click', enableNoSleep, false);
