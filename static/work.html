@@ -185,7 +185,7 @@
         function pingAndCheckConnection() {
             if (ws.readyState === ws.OPEN) {
                 ws.send(JSON.stringify({
-                    info: "ping"
+                    type: "ping"
                 }));
                 setTimeout(checkConnection, 2000);
             } else {
