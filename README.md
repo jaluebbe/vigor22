@@ -27,6 +27,12 @@ Using the imager for the SD card you could already set up your WiFi credentials,
 You are free to choose your username except for the name "gpstracker" which will be generated later.
 In the following we assume "pi" as username.
 
+## Activate SPI CAN bus
+Controller communicates direct to Motor Controller via CAN Bus 
+Add: in /boot/firmware/config.txt
+dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=12
+dtoverlay=spi-bcm2835-overlay
+
 ### Installation with sudo privileges
 These steps are performed under your username with sudo privileges:
 ```
