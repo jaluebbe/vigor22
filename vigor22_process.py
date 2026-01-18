@@ -316,6 +316,12 @@ class Vigor22Control:
             )
         )
         self.center_in_bounds = self.boundaries.point_included(*self.location)
+
+        if self.hb_state == "EDGE_L":
+            self.right_in_bounds = False
+        elif self.hb_state == "EDGE_R":
+            self.left_in_bounds = False
+
         new_left_rate = 0
         new_right_rate = 0
         if self.left_in_bounds:
@@ -372,7 +378,10 @@ class Vigor22Control:
         self.accuracy = gps_data["hdop"] * 15 if "hdop" in gps_data else None
         if None in (self.heading, self.speed):
             self.indicator = []
-        elif self.hb_state != "AUTO" or self.speed < self.min_speed:
+        elif (
+            self.hb_state not in ("AUTO", "EDGE_L", "EDGE_R")
+            or self.speed < self.min_speed
+        ):
             self.indicator = []
             self.close_left_shapes()
             self.close_right_shapes()
