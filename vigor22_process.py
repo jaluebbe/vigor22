@@ -46,6 +46,7 @@ class Vigor22Control:
     def __init__(self, project_path: pathlib.Path):
         self.redis_connection = redis.Redis(decode_responses=True)
         self.project_path = project_path
+        self.project_name = project_path.stem
         self.project = orjson.loads(self.project_path.read_bytes())
         self.settings = self.project["settings"]
         self.boundaries = pig.PointInGeoJSON(
@@ -175,6 +176,7 @@ class Vigor22Control:
             "client_feedback",
             orjson.dumps(
                 {
+                    "project_name": self.project_name,
                     "right_rate": self.right_rate,
                     "left_rate": self.left_rate,
                     "longitude": self.location[0],
