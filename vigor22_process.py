@@ -63,7 +63,7 @@ class Vigor22Control:
         self.left_in_bounds = False
         self.right_in_bounds = False
         self.center_in_bounds = False
-        self.motor_state = None
+        self.hb_state = None
         self.location = None
         self.heading = None
         self.speed = None
@@ -370,7 +370,7 @@ class Vigor22Control:
         self.accuracy = gps_data["hdop"] * 15 if "hdop" in gps_data else None
         if None in (self.heading, self.speed):
             self.indicator = []
-        elif self.motor_state != "Automatik" or self.speed < self.min_speed:
+        elif self.hb_state != "AUTO" or self.speed < self.min_speed:
             self.indicator = []
             self.close_left_shapes()
             self.close_right_shapes()
@@ -446,5 +446,4 @@ if __name__ == "__main__":
                 )
         elif item["channel"] == "motor_status" and vc is not None:
             data = orjson.loads(item["data"])
-            vc.motor_state = data["state"]
-
+            vc.hb_state = data["hb_state"]
