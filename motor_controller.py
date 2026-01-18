@@ -33,7 +33,7 @@ while True:
             data = orjson.loads(_message["data"])
             gps_ok = 5 < data["longitude"] < 17
             MotorAPI.set_info(data["speed"], gps_ok, data["project_name"])
-            if feedback["hb_state"] == "AUTO":
+            if feedback["hb_state"] in ["AUTO", "EDGE_L", "EDGE_R",]:
                 _new_left_rate = int(float(data["left_rate"]) * 100)
                 _new_right_rate = int(float(data["right_rate"]) * 100)
 
