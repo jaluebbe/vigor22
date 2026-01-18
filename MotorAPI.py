@@ -74,7 +74,7 @@ def set_info(speed, gps_ok, project_name):
     global _speed_str, _gps_str, _fieldname
     _speed_str = f"{speed * 3.6:8.1f}"
     _gps_str = f"{'ok' if gps_ok else 'fault':<8}"
-    _fieldname = project_name[:8]
+    _fieldname = f"{project_name:<8}"[:8]
 
 
 def process_can_bus(max_messages=50):
