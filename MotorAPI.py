@@ -23,7 +23,7 @@ _motor_status = 0
 _pos_l = 0
 _pos_r = 0
 _speed_str = "     0.0"
-_gps_str = "ok"
+_gps_str = "unknown"
 _fieldname = "unknown"
 
 def send_heartbeat(value=1000):
