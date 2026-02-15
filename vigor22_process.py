@@ -293,34 +293,39 @@ class Vigor22Control:
             [self.location, outer_left_point],
             [self.location, outer_right_point],
         ]
-        self.left_in_bounds = all(
-            (
-                self.boundaries.point_included(*_point)
-                for _point in (
-                    outer_left_point,
-                    inner_left_point,
-                    first_left_quartile_point,
-                    third_left_quartile_point,
+        self.left_in_bounds = (
+            self.hb_state == "EDGE_L"
+            or all(
+                (
+                    self.boundaries.point_included(*_point)
+                    for _point in (
+                        outer_left_point,
+                        inner_left_point,
+                        first_left_quartile_point,
+                        third_left_quartile_point,
+                    )
                 )
             )
+            and not self.hb_state == "EDGE_R"
         )
-        self.right_in_bounds = all(
-            (
-                self.boundaries.point_included(*_point)
-                for _point in (
-                    outer_right_point,
-                    inner_right_point,
-                    first_right_quartile_point,
-                    third_right_quartile_point,
+        self.right_in_bounds = (
+            self.hb_state == "EDGE_R"
+            or all(
+                (
+                    self.boundaries.point_included(*_point)
+                    for _point in (
+                        outer_right_point,
+                        inner_right_point,
+                        first_right_quartile_point,
+                        third_right_quartile_point,
+                    )
                 )
             )
+            and not self.hb_state == "EDGE_L"
         )
-        self.center_in_bounds = self.boundaries.point_included(*self.location)
-
-        if self.hb_state == "EDGE_L":
-            self.right_in_bounds = False
-        elif self.hb_state == "EDGE_R":
-            self.left_in_bounds = False
+        self.center_in_bounds = self.boundaries.point_included(
+            *self.location
+        ) or self.hb_state in ("EDGE_L", "EDGE_R")
 
         new_left_rate = 0
         new_right_rate = 0
@@ -442,6 +447,9 @@ if __name__ == "__main__":
                         data.pop(ignored_key, None)
                     redis_connection.lpush(key, orjson.dumps(data))
                     last_dump = vc.utc
+                if vc.hb_state in ("EDGE_L", "EDGE_R"):
+                    # TODO: perform edge tracking
+                    pass
         elif item["channel"] == "vigor22_control":
             data = orjson.loads(item["data"])
             if data.get("info") == "project_changed":
@@ -457,4 +465,8 @@ if __name__ == "__main__":
                 )
         elif item["channel"] == "motor_status" and vc is not None:
             data = orjson.loads(item["data"])
+            if data["hb_state"] == "AUTO" and vc.hb_state.startswith("EDGE"):
+                # TODO: implement creation of boundaries from edge tracking
+                # TODO: reset edge tracking, store backup under timestamp
+                pass
             vc.hb_state = data["hb_state"]
