@@ -35,7 +35,7 @@ sudo apt upgrade -y
 sudo apt dist-upgrade -y
 sudo apt autoremove -y
 sudo apt install chrony gpsd git redis-server python3-venv \
-anacron iptables python3-requests -y
+anacron iptables python3-requests joe -y
 sudo useradd -m gpstracker
 sudo usermod -a -G i2c,video,gpio gpstracker
 sudo passwd gpstracker
