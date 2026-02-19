@@ -448,8 +448,9 @@ if __name__ == "__main__":
                     redis_connection.lpush(key, orjson.dumps(data))
                     last_dump = vc.utc
                 if vc.hb_state in ("EDGE_L", "EDGE_R"):
-                    # TODO: perform edge tracking
-                    pass
+                    for ignored_key in dump_ignore_keys:
+                        data.pop(ignored_key, None)
+                    redis_connection.lpush("edge_tracking", orjson.dumps(data))
         elif item["channel"] == "vigor22_control":
             data = orjson.loads(item["data"])
             if data.get("info") == "project_changed":
@@ -467,6 +468,16 @@ if __name__ == "__main__":
             data = orjson.loads(item["data"])
             if data["hb_state"] == "AUTO" and vc.hb_state.startswith("EDGE"):
                 # TODO: implement creation of boundaries from edge tracking
-                # TODO: reset edge tracking, store backup under timestamp
-                pass
+                if vc.boundaries.point_included(*vc.location):
+                    # boundaries exist and should be overwritten
+                    pass
+                else:
+                    # boundaries should be created or extended
+                    pass
+                redis_connection.rename(
+                    "edge_tracking",
+                    "edge:vigor22:{}".format(
+                        time.strftime("%Y%m%d%H%M%S", time.gmtime())
+                    ),
+                )
             vc.hb_state = data["hb_state"]
