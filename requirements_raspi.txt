@@ -8,3 +8,6 @@ websockets
 python-multipart
 point-in-geojson
 python-can~=4.4.2
+geopandas
+shapely
+pyproj
