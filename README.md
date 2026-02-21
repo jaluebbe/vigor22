@@ -35,7 +35,7 @@ sudo apt upgrade -y
 sudo apt dist-upgrade -y
 sudo apt autoremove -y
 sudo apt install chrony gpsd git redis-server python3-venv \
-anacron iptables python3-requests joe -y
+anacron iptables python3-requests can-utils joe -y
 sudo useradd -m gpstracker
 sudo usermod -a -G i2c,video,gpio gpstracker
 sudo passwd gpstracker
@@ -61,7 +61,14 @@ You have to enable the serial port via
 sudo raspi-config
 ```
 and select "Interface Options" -> "Serial Port" -> "No" -> "Yes" -> "Ok".
-The I2C interface needs to be enabled as well to control the motors and other sensors.
+The I2C and SPI interface needs to be enabled as well to control the motors and other sensors.
+Now edit /boot/firmware/config.txt and extend the SPI settings in the
+following way:
+```
+dtparam=spi=on
+dtoverlay=spi1-1cs,cs0_pin=16
+dtoverlay=mcp2515,spi1-0,oscillator=16000000,interrupt=26
+```
 
 Reboot your device with
 ```
@@ -152,6 +159,23 @@ sudo systemctl enable gpspoller.service
 Instead of "enable" you may also call "disable", "start", "stop" or "restart".
 Attention, do not try these steps as "gpstracker" user as it is missing sudo privileges.
 Use your personal user e.g. "pi" instead.
+
+Test the CAN bus connection:
+Set up the MCP2515 CAN device by calling
+```
+sudo ip link set can0 up type can bitrate 125000
+```
+and check the CAN messages by using:
+```
+candump can0
+```
+If everything is ok, you should install the startup script for the CAN
+interface:
+```
+sudo cp /home/gpstracker/vigor22/etc/systemd/system/can0.service /etc/systemd/system/
+sudo systemctl enable can0.service
+```
+
 
 Test the motor controller:
 ```
