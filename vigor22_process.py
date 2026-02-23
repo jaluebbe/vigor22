@@ -8,6 +8,7 @@ import geojson
 import orjson
 import redis
 import point_in_geojson as pig
+import linestring_to_polygon as ltp
 
 dump_ignore_keys = [
     "mode",
@@ -401,6 +402,7 @@ class Vigor22Control:
 
     def write_data(self):
         self.project["protocol"] = self.protocol.to_dict()
+        self.project["boundaries"] = self.boundaries.to_dict()
         if self.project_path.is_file():
             self.project_path.write_bytes(orjson.dumps(self.project))
 
@@ -421,7 +423,10 @@ if __name__ == "__main__":
     _pubsub = redis_connection.pubsub()
     _pubsub.subscribe("gps", "vigor22_control", "motor_status")
     last_dump = None
+    last_edge_point = None
     track_log_interval = 5
+    track_log_distance = 2
+    edge_tolerance = 2
 
     for item in _pubsub.listen():
         if not item["type"] == "message":
@@ -447,10 +452,19 @@ if __name__ == "__main__":
                         data.pop(ignored_key, None)
                     redis_connection.lpush(key, orjson.dumps(data))
                     last_dump = vc.utc
-                if vc.hb_state in ("EDGE_L", "EDGE_R"):
-                    for ignored_key in dump_ignore_keys:
-                        data.pop(ignored_key, None)
-                    redis_connection.lpush("edge_tracking", orjson.dumps(data))
+                if vc.hb_state in (
+                    "EDGE_L",
+                    "EDGE_R"
+                    and (
+                        last_edge_point is None
+                        or pig.geodesic_distance(*last_edge_point, *vc.location)
+                        > track_log_distance
+                    ),
+                ):
+                    last_edge_point = vc.location
+                    redis_connection.lpush(
+                        "edge_tracking", orjson.dumps(vc.location)
+                    )
         elif item["channel"] == "vigor22_control":
             data = orjson.loads(item["data"])
             if data.get("info") == "project_changed":
@@ -467,13 +481,27 @@ if __name__ == "__main__":
         elif item["channel"] == "motor_status" and vc is not None:
             data = orjson.loads(item["data"])
             if data["hb_state"] == "AUTO" and vc.hb_state.startswith("EDGE"):
-                # TODO: implement creation of boundaries from edge tracking
+                reversed_edge_data = redis_connection.lrange(
+                    "edge_tracking", 0, -1
+                )
+                edge_data = ",\n".join(reversed_edge_data[::-1])
+                edge_geojson = geojson.Feature(
+                    geometry=geojson.LineString(json.loads(f"[{edge_data}]"))
+                )
+                edge_polygon = simplify_polygon(
+                    ltp.linestring_to_polygon(edge_geojson), edge_tolerance
+                )
                 if vc.boundaries.point_included(*vc.location):
                     # boundaries exist and should be overwritten
-                    pass
+                    vc.boundaries = pig.PointInGeoJSON(
+                        json.dumps(geojson.FeatureCollection([edge_polygon]))
+                    )
                 else:
                     # boundaries should be created or extended
-                    pass
+                    boundaries = vc.boundaries.to_dict()
+                    boundaries["features"].append(edge_polygon)
+                    vc.boundaries = pig.PointInGeoJSON(json.dumps(boundaries))
+                vc.send_boundaries()
                 redis_connection.rename(
                     "edge_tracking",
                     "edge:vigor22:{}".format(
