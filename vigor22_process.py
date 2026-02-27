@@ -480,7 +480,11 @@ if __name__ == "__main__":
                 )
         elif item["channel"] == "motor_status" and vc is not None:
             data = orjson.loads(item["data"])
-            if data["hb_state"] == "AUTO" and vc.hb_state.startswith("EDGE"):
+            if (
+                data["hb_state"] == "AUTO"
+                and vc.hb_state is not None
+                and vc.hb_state.startswith("EDGE")
+            ):
                 reversed_edge_data = redis_connection.lrange(
                     "edge_tracking", 0, -1
                 )
@@ -488,7 +492,7 @@ if __name__ == "__main__":
                 edge_geojson = geojson.Feature(
                     geometry=geojson.LineString(json.loads(f"[{edge_data}]"))
                 )
-                edge_polygon = simplify_polygon(
+                edge_polygon = ltp.simplify_polygon(
                     ltp.linestring_to_polygon(edge_geojson), edge_tolerance
                 )
                 if vc.boundaries.point_included(*vc.location):
