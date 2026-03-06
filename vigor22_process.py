@@ -452,14 +452,10 @@ if __name__ == "__main__":
                         data.pop(ignored_key, None)
                     redis_connection.lpush(key, orjson.dumps(data))
                     last_dump = vc.utc
-                if vc.hb_state in (
-                    "EDGE_L",
-                    "EDGE_R"
-                    and (
-                        last_edge_point is None
-                        or pig.geodesic_distance(*last_edge_point, *vc.location)
-                        > track_log_distance
-                    ),
+                if vc.hb_state in ("EDGE_L", "EDGE_R") and (
+                    last_edge_point is None
+                    or pig.geodesic_distance(*last_edge_point, *vc.location)
+                    > track_log_distance
                 ):
                     last_edge_point = vc.location
                     redis_connection.lpush(
