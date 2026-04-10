@@ -82,16 +82,24 @@ function setBoundaries(feature_collection) {
     boundariesArea = turf.area(boundariesMultiPolygon);
     setTotalArea(boundariesArea);
     updateMissingArea();
-    if (boundariesLayer.getBounds().isValid())
-        map.fitBounds(boundariesLayer.getBounds());
+    if (boundariesLayer.getBounds().isValid()) {
+        const layerBounds = boundariesLayer.getBounds();
+        if (!map.getBounds().intersects(layerBounds)) {
+            map.fitBounds(layerBounds);
+        }
+    }
 }
 
 function setPlan(feature_collection) {
     planLayer.clearLayers();
     planLayer.addData(feature_collection);
     updateMissingArea();
-    if (planLayer.getBounds().isValid())
-        map.fitBounds(planLayer.getBounds());
+    if (planLayer.getBounds().isValid()) {
+        const layerBounds = planLayer.getBounds();
+        if (!map.getBounds().intersects(layerBounds)) {
+            map.fitBounds(layerBounds);
+        }
+    }
 }
 
 function setProtocol(feature_collection) {
