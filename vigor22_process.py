@@ -8,6 +8,7 @@ import geojson
 import orjson
 import redis
 import point_in_geojson as pig
+import linestring_to_polygon as ltp
 
 dump_ignore_keys = [
     "mode",
@@ -46,6 +47,7 @@ class Vigor22Control:
     def __init__(self, project_path: pathlib.Path):
         self.redis_connection = redis.Redis(decode_responses=True)
         self.project_path = project_path
+        self.project_name = project_path.stem
         self.project = orjson.loads(self.project_path.read_bytes())
         self.settings = self.project["settings"]
         self.boundaries = pig.PointInGeoJSON(
@@ -63,7 +65,7 @@ class Vigor22Control:
         self.left_in_bounds = False
         self.right_in_bounds = False
         self.center_in_bounds = False
-        self.motor_state = None
+        self.hb_state = None
         self.location = None
         self.heading = None
         self.speed = None
@@ -175,6 +177,7 @@ class Vigor22Control:
             "client_feedback",
             orjson.dumps(
                 {
+                    "project_name": self.project_name,
                     "right_rate": self.right_rate,
                     "left_rate": self.left_rate,
                     "longitude": self.location[0],
@@ -291,29 +294,40 @@ class Vigor22Control:
             [self.location, outer_left_point],
             [self.location, outer_right_point],
         ]
-        self.left_in_bounds = all(
-            (
-                self.boundaries.point_included(*_point)
-                for _point in (
-                    outer_left_point,
-                    inner_left_point,
-                    first_left_quartile_point,
-                    third_left_quartile_point,
+        self.left_in_bounds = (
+            self.hb_state == "EDGE_L"
+            or all(
+                (
+                    self.boundaries.point_included(*_point)
+                    for _point in (
+                        outer_left_point,
+                        inner_left_point,
+                        first_left_quartile_point,
+                        third_left_quartile_point,
+                    )
                 )
             )
+            and not self.hb_state == "EDGE_R"
         )
-        self.right_in_bounds = all(
-            (
-                self.boundaries.point_included(*_point)
-                for _point in (
-                    outer_right_point,
-                    inner_right_point,
-                    first_right_quartile_point,
-                    third_right_quartile_point,
+        self.right_in_bounds = (
+            self.hb_state == "EDGE_R"
+            or all(
+                (
+                    self.boundaries.point_included(*_point)
+                    for _point in (
+                        outer_right_point,
+                        inner_right_point,
+                        first_right_quartile_point,
+                        third_right_quartile_point,
+                    )
                 )
             )
+            and not self.hb_state == "EDGE_L"
         )
-        self.center_in_bounds = self.boundaries.point_included(*self.location)
+        self.center_in_bounds = self.boundaries.point_included(
+            *self.location
+        ) or self.hb_state in ("EDGE_L", "EDGE_R")
+
         new_left_rate = 0
         new_right_rate = 0
         if self.left_in_bounds:
@@ -370,7 +384,10 @@ class Vigor22Control:
         self.accuracy = gps_data["hdop"] * 15 if "hdop" in gps_data else None
         if None in (self.heading, self.speed):
             self.indicator = []
-        elif self.motor_state != "Automatik" or self.speed < self.min_speed:
+        elif (
+            self.hb_state not in ("AUTO", "EDGE_L", "EDGE_R")
+            or self.speed < self.min_speed
+        ):
             self.indicator = []
             self.close_left_shapes()
             self.close_right_shapes()
@@ -385,6 +402,7 @@ class Vigor22Control:
 
     def write_data(self):
         self.project["protocol"] = self.protocol.to_dict()
+        self.project["boundaries"] = self.boundaries.to_dict()
         if self.project_path.is_file():
             self.project_path.write_bytes(orjson.dumps(self.project))
 
@@ -405,7 +423,10 @@ if __name__ == "__main__":
     _pubsub = redis_connection.pubsub()
     _pubsub.subscribe("gps", "vigor22_control", "motor_status")
     last_dump = None
+    last_edge_point = None
     track_log_interval = 5
+    track_log_distance = 2
+    edge_tolerance = 2
 
     for item in _pubsub.listen():
         if not item["type"] == "message":
@@ -431,6 +452,15 @@ if __name__ == "__main__":
                         data.pop(ignored_key, None)
                     redis_connection.lpush(key, orjson.dumps(data))
                     last_dump = vc.utc
+                if vc.hb_state in ("EDGE_L", "EDGE_R") and (
+                    last_edge_point is None
+                    or pig.geodesic_distance(*last_edge_point, *vc.location)
+                    > track_log_distance
+                ):
+                    last_edge_point = vc.location
+                    redis_connection.lpush(
+                        "edge_tracking", orjson.dumps(vc.location)
+                    )
         elif item["channel"] == "vigor22_control":
             data = orjson.loads(item["data"])
             if data.get("info") == "project_changed":
@@ -446,5 +476,36 @@ if __name__ == "__main__":
                 )
         elif item["channel"] == "motor_status" and vc is not None:
             data = orjson.loads(item["data"])
-            vc.motor_state = data["state"]
-
+            if (
+                data["hb_state"] == "AUTO"
+                and vc.hb_state is not None
+                and vc.hb_state.startswith("EDGE")
+            ):
+                reversed_edge_data = redis_connection.lrange(
+                    "edge_tracking", 0, -1
+                )
+                edge_data = ",\n".join(reversed_edge_data[::-1])
+                edge_geojson = geojson.Feature(
+                    geometry=geojson.LineString(json.loads(f"[{edge_data}]"))
+                )
+                edge_polygon = ltp.simplify_polygon(
+                    ltp.linestring_to_polygon(edge_geojson), edge_tolerance
+                )
+                if vc.boundaries.point_included(*vc.location):
+                    # boundaries exist and should be overwritten
+                    vc.boundaries = pig.PointInGeoJSON(
+                        json.dumps(geojson.FeatureCollection([edge_polygon]))
+                    )
+                else:
+                    # boundaries should be created or extended
+                    boundaries = vc.boundaries.to_dict()
+                    boundaries["features"].append(edge_polygon)
+                    vc.boundaries = pig.PointInGeoJSON(json.dumps(boundaries))
+                vc.send_boundaries()
+                redis_connection.rename(
+                    "edge_tracking",
+                    "edge:vigor22:{}".format(
+                        time.strftime("%Y%m%d%H%M%S", time.gmtime())
+                    ),
+                )
+            vc.hb_state = data["hb_state"]
