@@ -119,7 +119,7 @@
         } else {
             ws_protocol = "ws:"
         }
-        var lastMessageUtc = undefined;
+        var lastReceivedAt = undefined;
 
         function displayConnectionStatus() {
             statusLight.style["background-color"] = statusColors[ws.readyState];
@@ -142,7 +142,7 @@
             } else if (message.type == "pong") {} else {
                 return
             }
-            lastMessageUtc = message.utc;
+            lastReceivedAt = Date.now() / 1e3;
         }
 
         function connect() {
@@ -177,7 +177,7 @@
 
         function checkConnection() {
             const utcNow = Date.now() / 1e3;
-            if (lastMessageUtc == null || utcNow - lastMessageUtc > 5) {
+            if (lastReceivedAt == null || utcNow - lastReceivedAt > 5) {
                 resetVigorConnection();
             }
         }

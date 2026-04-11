@@ -44,6 +44,8 @@ async def redis_connector(
     ):
         await pubsub.subscribe(source_channel)
         async for message in pubsub.listen():
+            if message is None:
+                continue
             await websocket.send_text(message["data"])
 
     redis_connection = aioredis.Redis(host=redis_host, decode_responses=True)
